@@ -37,7 +37,9 @@ button[id=login-btn] {
     border-radius: 4px;
     cursor: pointer;
     float: right;
+    transition: all 0.3s ease;
 }
+
 .small {
     font-size: .9rem;
 }
