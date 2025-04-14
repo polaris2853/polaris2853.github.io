@@ -29,7 +29,8 @@ button[type=submit] {
 button[type=submit]:hover {
     background-color: #45a049;
 }
-button[id=login-btn] {
+
+#login-btn {
     background-color: #04AA6D;
     color: white;
     padding: 10px 15px;
@@ -39,8 +40,8 @@ button[id=login-btn] {
     float: right;
     transition: all 0.3s ease;
 }
-
-.small {
+#login-btn:hover {
+    background-color: #45a049;
     font-size: .9rem;
 }
 

@@ -15,12 +15,13 @@ header {
 header h1 {
     margin: 0;
     font-size: 3rem;
-    padding: 1rem 0 1rem 0;
+    padding: 1rem 0rem 1rem 0rem;
     text-align: center;
 }
 
 /* Format navigation */
 nav {
+  width: 100%;
   font-size: 1rem;
   line-height: 2;
   padding: 1rem 0;
