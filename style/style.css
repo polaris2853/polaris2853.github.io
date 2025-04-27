@@ -256,6 +256,9 @@ img {
     background-color: var(--accent);
     margin: 3rem 0;
     text-align: center;
+    word-wrap: break-word; /* Break long words into multiple lines */
+    overflow-wrap: break-word; /* Ensure wrapping of long words */
+
 }
 
 /* section two */
