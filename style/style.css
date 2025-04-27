@@ -258,7 +258,9 @@ img {
     text-align: center;
     word-wrap: break-word; /* Break long words into multiple lines */
     overflow-wrap: break-word; /* Ensure wrapping of long words */
-
+    white-space: pre-wrap; /* Maintain spacing but allow wrapping */
+    max-width: 100%; /* Ensure it doesn't overflow */
+    box-sizing: border-box; /* Ensure padding and border are considered in width */
 }
 
 /* section two */
