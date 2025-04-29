@@ -22,31 +22,63 @@ header h1 {
 /* Format navigation */
 nav {
   width: 100%;
-  font-size: 1rem;
-  line-height: 2;
-  padding: 1rem 0;
-  margin-left: 1rem;
+    font-size: 1rem;
+    line-height: 2;
+    padding: 1rem 0;
+    margin-left: 1rem;
 }
 
 nav a {
-  border: 1px solid var(--text);
-  border-radius: 5px;
-  color: var(--text) !important;
-  display: inline-block;
-  padding: .1rem 1rem;
-  margin-right: 1rem;
-  text-decoration: none;
-  transition: .4s;
+    border: 1px solid var(--text);
+    border-radius: 5px;
+    color: var(--text) !important;
+    display: inline-block;
+    padding: .1rem 1rem;
+    margin-right: 1rem;
+    text-decoration: none;
+    transition: .4s;
 }
 
 nav a:hover,
 nav a.current {
-  color: var(--text) !important;
-  background: var(--accent);
+    color: var(--text) !important;
+    background: var(--accent);
 }
 
 nav a.current:hover {
-  text-decoration: none;
+    text-decoration: none;
+}
+
+button[type=submit] {
+    background-color: #04AA6D;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+    button[type=submit]:hover {
+        background-color: #45a049;
+    }
+
+#login-btn {
+    background-color: #04AA6D;
+    color: white;
+    border: .04rem solid var(--text);
+    border-radius: 1px;
+    display: inline-block;
+    padding: .55rem 1.5rem;
+    margin-right: 0.04rem;
+    text-decoration: none;
+    transition: .4s;
+    float: right;
+}
+
+#login-btn:hover, login-btn.current {
+    background-color: #45a049;
+    font-size: 1rem;
+    color: var(--text) !important;
 }
 
 @media (max-width: 768px) {
@@ -67,6 +99,17 @@ nav a.current:hover {
     text-decoration: none;
     transition: 0.4s;
   }
+
+    #login-btn {
+        border: 0.15rem solid var(--text);
+        border-radius: 5px;
+        color: var(--text) !important;
+        display: inline-block;
+        padding: 0.3rem 1rem; /* Reduce the padding to make the links smaller */
+        margin-right: 0.1rem; /* Reduce the right margin */
+        text-decoration: none;
+        transition: 0.4s;
+    }
 }
 
 header,
