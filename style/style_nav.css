@@ -47,7 +47,6 @@ header h1 {
 
 .nav-links.show {
 	display: flex;
-	transition: 3s;
 	position: absolute;
 }
 
