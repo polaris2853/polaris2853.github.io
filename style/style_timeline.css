@@ -1,4 +1,4 @@
-body {	
+﻿body {	
   font-size: 1.1rem;
   margin: 0 0 4rem 0;
   padding: 0 .5rem;
@@ -10,6 +10,133 @@ body {
 }
 
 /* ================ The Timeline ================ */
+
+:root {
+	--bg-color: #0a0a0c;
+	--text-glow: rgba(255, 255, 255, 0.8);
+	--glass: rgba(255, 255, 255, 0.05);
+}
+
+body, html {
+	margin: 0;
+	padding: 0;
+	background-color: var(--bg-color);
+	color: white;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	overflow-x: hidden;
+}
+
+/* The "Dreamy" Intro Overlay */
+#intro-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: white;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+	animation: fadeOut 4s ease-in-out forwards;
+	pointer-events: none;
+}
+
+@keyframes fadeOut {
+	0% {
+		opacity: 1;
+	}
+
+	40% {
+		opacity: 1;
+		filter: blur(0px);
+	}
+
+	100% {
+		opacity: 0;
+		filter: blur(20px);
+	}
+}
+
+/* Main Content Animation */
+.content {
+	opacity: 0;
+	transform: translateY(30px);
+	animation: emerge 3s ease-out 2s forwards;
+	max-width: 800px;
+	margin: 100px auto;
+	padding: 20px;
+}
+
+@keyframes emerge {
+	to {
+		opacity: 1;
+		transform: translateY(0);
+		filter: blur(0);
+	}
+}
+
+h1 {
+	text-align: center;
+	font-weight: 200;
+	letter-spacing: 8px;
+	text-transform: uppercase;
+	text-shadow: 0 0 15px var(--text-glow);
+}
+
+/* Memory Card (Glassmorphism) */
+.memory-card {
+	background: var(--glass);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 15px;
+	padding: 20px;
+	margin-bottom: 40px;
+	transition: transform 0.5s ease;
+}
+
+	.memory-card:hover {
+		transform: scale(1.02);
+		background: rgba(255, 255, 255, 0.08);
+	}
+
+/* The Summary Tag Logic */
+summary {
+	cursor: pointer;
+	padding: 10px;
+	font-style: italic;
+	color: #aaa;
+	list-style: none; /* Removes default arrow */
+	display: flex;
+	align-items: center;
+}
+
+	summary::before {
+		content: '✧';
+		margin-right: 10px;
+		transition: 0.3s;
+	}
+
+details[open] summary::before {
+	transform: rotate(45deg);
+	color: white;
+}
+
+.meta-data {
+	font-family: 'Courier New', Courier, monospace;
+	font-size: 0.85rem;
+	color: #66edff; /* Cyber/Intel Blue */
+	padding: 10px;
+	border-left: 1px solid #333;
+}
+
+/* Dust Particles Background */
+#canvas {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: -1;
+}
 
 .instagram-media {
   position: relative;
