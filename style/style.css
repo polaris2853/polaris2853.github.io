@@ -218,11 +218,11 @@ img {
 }
 
 .divrandom {
-  margin: 2rem 0 4rem 0;
+	margin: 2rem 0 4rem 0;
 }
 
 .random {
-  background: var(--before-green);
+	background: #66edff;
 }
 
 .notice {

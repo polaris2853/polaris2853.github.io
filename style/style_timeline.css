@@ -2,7 +2,6 @@
   font-size: 1.1rem;
   margin: 0 0 4rem 0;
   padding: 0 .5rem;
-  background: var(--bg);
   
   color: var(--text);
   font-family: var(--sans-font), sans-serif;
@@ -20,13 +19,12 @@
 body, html {
 	margin: 0;
 	padding: 0;
-	background-color: var(--bg-color);
+
 	color: white;
 	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 	overflow-x: hidden;
 }
 
-/* The "Dreamy" Intro Overlay */
 #intro-overlay {
 	position: fixed;
 	top: 0;
@@ -58,7 +56,6 @@ body, html {
 	}
 }
 
-/* Main Content Animation */
 .content {
 	opacity: 0;
 	transform: translateY(30px);
@@ -84,7 +81,6 @@ h1 {
 	text-shadow: 0 0 15px var(--text-glow);
 }
 
-/* Memory Card (Glassmorphism) */
 .memory-card {
 	background: var(--glass);
 	backdrop-filter: blur(10px);
@@ -100,13 +96,12 @@ h1 {
 		background: rgba(255, 255, 255, 0.08);
 	}
 
-/* The Summary Tag Logic */
 summary {
 	cursor: pointer;
 	padding: 10px;
 	font-style: italic;
 	color: #aaa;
-	list-style: none; /* Removes default arrow */
+	list-style: none;
 	display: flex;
 	align-items: center;
 }
@@ -125,12 +120,12 @@ details[open] summary::before {
 .meta-data {
 	font-family: 'Courier New', Courier, monospace;
 	font-size: 0.85rem;
-	color: #66edff; /* Cyber/Intel Blue */
+	color: #66edff;
 	padding: 10px;
 	border-left: 1px solid #333;
 }
 
-/* Dust Particles Background */
+/* Background */
 #canvas {
 	position: fixed;
 	top: 0;

@@ -1,13 +1,196 @@
 ﻿<!DOCTYPE html>
-
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>37.79137819762757, -122.40180767450249</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Class Memorial | Echoes</title>
+	<style>
+		:root {
+			--bg-color: #0a0a0c;
+			--text-glow: rgba(255, 255, 255, 0.8);
+			--glass: rgba(255, 255, 255, 0.05);
+		}
+
+		body, html {
+			margin: 0;
+			padding: 0;
+			background-color: var(--bg-color);
+			color: white;
+			font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+			overflow-x: hidden;
+		}
+
+		/* The "Dreamy" Intro Overlay */
+		#intro-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 1000;
+			animation: fadeOut 4s ease-in-out forwards;
+			pointer-events: none;
+		}
+
+		@keyframes fadeOut {
+			0% {
+				opacity: 1;
+			}
+
+			40% {
+				opacity: 1;
+				filter: blur(0px);
+			}
+
+			100% {
+				opacity: 0;
+				filter: blur(20px);
+			}
+		}
+
+		/* Main Content Animation */
+		.content {
+			opacity: 0;
+			transform: translateY(30px);
+			animation: emerge 3s ease-out 2s forwards;
+			max-width: 800px;
+			margin: 100px auto;
+			padding: 20px;
+		}
+
+		@keyframes emerge {
+			to {
+				opacity: 1;
+				transform: translateY(0);
+				filter: blur(0);
+			}
+		}
+
+		h1 {
+			text-align: center;
+			font-weight: 200;
+			letter-spacing: 8px;
+			text-transform: uppercase;
+			text-shadow: 0 0 15px var(--text-glow);
+		}
+
+		/* Memory Card (Glassmorphism) */
+		.memory-card {
+			background: var(--glass);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.1);
+			border-radius: 15px;
+			padding: 20px;
+			margin-bottom: 40px;
+			transition: transform 0.5s ease;
+		}
+
+			.memory-card:hover {
+				transform: scale(1.02);
+				background: rgba(255, 255, 255, 0.08);
+			}
+
+		/* The Summary Tag Logic */
+		summary {
+			cursor: pointer;
+			padding: 10px;
+			font-style: italic;
+			color: #aaa;
+			list-style: none; /* Removes default arrow */
+			display: flex;
+			align-items: center;
+		}
+
+			summary::before {
+				content: '✧';
+				margin-right: 10px;
+				transition: 0.3s;
+			}
+
+		details[open] summary::before {
+			transform: rotate(45deg);
+			color: white;
+		}
+
+		.meta-data {
+			font-family: 'Courier New', Courier, monospace;
+			font-size: 0.85rem;
+			color: #66edff; /* Cyber/Intel Blue */
+			padding: 10px;
+			border-left: 1px solid #333;
+		}
+
+		/* Dust Particles Background */
+		#canvas {
+			position: fixed;
+			top: 0;
+			left: 0;
+			z-index: -1;
+		}
+	</style>
 </head>
 <body>
-    <p>rklG37M</p>
-    <!-- <img src="asserts/img/imgur.jpeg" width="400" height="400" /> -->
-    <p>Seriously, don't overthink the image. It just provides context for the code above.</p>
+
+	<div id="intro-overlay">
+		<h2 style="color: black; font-weight: 200; letter-spacing: 5px;">REMEMBERING...</h2>
+	</div>
+
+	<canvas id="canvas"></canvas>
+
+	<div class="content">
+		<h1>Class of 2024</h1>
+
+		<div class="memory-card">
+			<h3>The Morning of the First Rain</h3>
+			<p>We all stood under the awning near the cafeteria. That was the day the tech finally clicked for most of us.</p>
+
+			<details>
+				<summary>View Technical Footprint</summary>
+				<div class="meta-data">
+					[ExifTool Signal]<br>
+					DateTimeOriginal: 2024:03:12 08:42:15<br>
+					Device: iPhone 13 Pro<br>
+					Focal Length: 26mm
+				</div>
+			</details>
+		</div>
+
+	</div>
+
+	<script>
+		// Simple Particle System
+		const canvas = document.getElementById('canvas');
+		const ctx = canvas.getContext('2d');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		let particles = [];
+		for (let i = 0; i < 60; i++) {
+			particles.push({
+				x: Math.random() * canvas.width,
+				y: Math.random() * canvas.height,
+				radius: Math.random() * 2,
+				speed: Math.random() * 0.5 + 0.1
+			});
+		}
+
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+			particles.forEach(p => {
+				ctx.beginPath();
+				ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+				ctx.fill();
+				p.y -= p.speed;
+				if (p.y < 0) p.y = canvas.height;
+			});
+			requestAnimationFrame(draw);
+		}
+		draw();
+	</script>
 </body>
 </html>
