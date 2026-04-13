@@ -3,6 +3,14 @@
 <head>
 	<meta charset="UTF-8">
 	<title>27yx's Memories</title>
+	<script type="importmap" crossorigin="anonymous">
+				{
+					"imports": {
+						"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+						"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+					}
+				}
+	</script>
 	<script type="module" src="JS/Register.js"></script>
 	<script type="module" src="JS/base.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +22,6 @@
 		body {
 			margin: 0;
 			overflow: hidden;
-			
 		}
 
 		#crosshair {
@@ -64,14 +71,7 @@
 	<div id="instructions">CLICK TO ENTER THE MEMORY VOID</div>
 	<div id="crosshair"></div>
 
-	<script type="importmap">
-		{
-			"imports": {
-				"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-				"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-			}
-		}
-	</script>
+
 
 	<script type="module" src="JS/3D.js"></script>
 </body>
