@@ -5,14 +5,15 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 
 // Khung cảnh
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.02); // Sương mù
+scene.fog = new THREE.FogExp2(0x000000, 0.1); // Sương mù
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
 camera.position.y = 1.8; // Chiều cao góc nhìn
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0xffffff);
 document.body.appendChild(renderer.domElement);
 
 // Điều khiển
@@ -43,132 +44,209 @@ function onKeyPress(event, isPressed) {
 	}
 }
 
+/* Render */
+const SETTINGS = {
+	imagePath: 'asserts/img/',
+	jsonPath: 'asserts/img/images.json',
+	renderDistance: 30,
+	dotThreshold: 0.3 // Tích vô hướng góc nhìn khoảng 90-100 độ
+};
 
+let hoveredObject = null;
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
-/* RENDER VẬT THỂ */
-
-// Nền đất
-const gridHelper = new THREE.GridHelper(100, 100, 0x333333, 0x111111);
-scene.add(gridHelper);
-
-// Khối Lập Phương
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-for (let i = 0; i < 100; i++) {
-	const material = new THREE.MeshBasicMaterial({
-		color: 0x66edff,
-		wireframe: true
-	});
-	const cube = new THREE.Mesh(geometry, material);
-	cube.position.set(
-		(Math.random() - 0.5) * 100,
-		Math.random() * 5,
-		(Math.random() - 0.5) * 100
-	);
-	scene.add(cube);
-}
-const loader = new THREE.TextureLoader();
-
-// Vật thể: Ảnh
-// 1. Tạo giao diện hiện thông tin ảnh/cá nhân (Mép phải màn hình)
+/* THIẾT KẾ UI */
 const infoUI = document.createElement('div');
 infoUI.id = 'info-panel';
-infoUI.style = `
-    position: fixed; top: 0; right: -400px; width: 350px; height: 100%;
-    background: rgba(0, 0, 0, 0.85); color: white; padding: 40px;
-    box-shadow: -5px 0 15px rgba(0,0,0,0.5); border-left: 2px solid #66edff;
-    transition: 0.5s ease; z-index: 1000; backdrop-filter: blur(10px);
-    font-family: sans-serif;
-`;
+
+// CSS
+Object.assign(infoUI.style, {
+	position: 'fixed',
+	top: '20px', // Cách mép trên
+	right: '-450px',
+	width: '380px',
+	height: 'calc(100% - 40px)', // Cách mép dưới
+	// Gradient Xanh Teal + Tím nhạt + Hồng tro
+	background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(10, 40, 50, 0.5))',
+	color: 'white',
+	padding: '50px 40px',
+	boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+	border: '1px solid rgba(255, 255, 255, 0.18)',
+	borderRadius: '20px 0 0 20px', // Bo góc bên trái
+	transition: '0.8s cubic-bezier(0.16, 1, 0.3, 1)', // Hiệu ứng trượt
+	zIndex: '1000',
+	backdropFilter: 'blur(15px)', // Tăng độ nhòe
+	fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+	overflowY: 'auto',
+	pointerEvents: 'none'
+});
+
 infoUI.innerHTML = `
-    <div id="close-ui" style="position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 24px;">✕</div>
-    <h2 id="ui-name" style="color: #66edff; margin-bottom: 5px;"></h2>
-    <p id="ui-role" style="font-style: italic; color: #aaa; margin-bottom: 20px;"></p>
-    <hr style="border: 0; border-top: 1px solid #333; margin-bottom: 20px;">
-    <p id="ui-story" style="line-height: 1.6; font-size: 1.1rem;"></p>
-`;
+    <div id="close-ui" style="font-size: 1rem; margin-bottom: 5px; color: #fff; text-shadow: 0 0 10px rgba(102, 237, 255, 0.5);">✕ CLOSE</div>
+    <div style="margin-top: 20px;">
+        <h2 id="ui-name" style="font-size: 2.2rem; font-weight: 300; letter-spacing: 2px; margin-bottom: 5px; color: #fff; text-shadow: 0 0 10px rgba(102, 237, 255, 0.5);"></h2>
+        <div id="ui-role" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 3px; color: #66edff; margin-bottom: 30px; opacity: 0.8;"></div>
+    </div>
+
+    <div style="width: 40px; height: 2px; background: #66edff; margin-bottom: 30px;"></div>
+
+    <div style="position: relative;">
+        <p id="ui-story" style="line-height: 1.8; font-size: 1.05rem; font-weight: 300; color: rgba(255,255,255,0.9); font-style: italic;"></p>
+        <span style="position: absolute; top: -20px; left: -10px; font-size: 80px; color: rgba(255,255,255,0.05); font-family: serif; pointer-events: none;">“</span>
+    </div>
+
+    <div style="margin-top: 60px; font-size: 0.7rem; opacity: 0.3; letter-spacing: 1px;">
+        MEMORIES VOID
+    </div>`;
 document.body.appendChild(infoUI);
 
-// Đóng UI khi bấm nút X
-document.getElementById('close-ui').onclick = () => infoUI.style.right = '-400px';
+document.getElementById('close-ui').onclick = () => {
+	infoUI.style.right = '-400px';
+	infoUI.style.pointerEvents = 'none';
+};
 
-// 2. Load Memories với Data-Driven
+/* Render */
+
 async function loadMemories() {
 	try {
-		const response = await fetch('asserts/timeline/images.json');
-		const dataList = await response.json();
+		const res = await fetch(SETTINGS.jsonPath);
+		const dataList = await res.json();
 
-		dataList.forEach(data => {
-			const fullPath = `asserts/timeline/${data.file}`;
-			create3DFragment(fullPath, data); // Truyền data
-		});
-	} catch (error) {
-		console.error("Lỗi danh bạ:", error);
+		// Await để tránh đứng trình duyệt khi giải nén ảnh Hi-res
+		for (const data of dataList) {
+			create3DFragment(`${SETTINGS.imagePath}${data.file}`, data);
+			await new Promise(r => setTimeout(r, 50));
+		}
+	} catch (err) {
+		console.error("Lỗi data:", err);
 	}
 }
 
 function create3DFragment(url, data) {
-	const loader = new THREE.TextureLoader();
-	loader.load(url, (texture) => {
-		const aspect = texture.image.width / texture.image.height;
-		const geometry = new THREE.PlaneGeometry(1 * aspect, 1);
-		const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide, transparent: false, opacity: 1.0 });
-		const mesh = new THREE.Mesh(geometry, material);
+	const loader = new THREE.ImageBitmapLoader();
+	// Sử dụng ImageBitmapLoader thay cho TextureLoader tránh làm treo UI
+	loader.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' });
 
-		// Vị trí ngẫu nhiên
-		mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 0.5) * 1.8, (Math.random() - 0.5) * 60);
+	loader.load(url, (imageBitmap) => {
+		const texture = new THREE.CanvasTexture(imageBitmap);
+		texture.generateMipmaps = false;
+		texture.minFilter = THREE.NearestFilter;
+
+		const aspect = texture.image.width / texture.image.height;
+		const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
+		const material = new THREE.MeshBasicMaterial({
+			map: texture,
+			side: THREE.DoubleSide,
+			transparent: false,
+			opacity: 0 // Khởi tạo ẩn để fade-in ở UpdateFrame
+		});
+
+		const mesh = new THREE.Mesh(geometry, material);
+		mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
 		mesh.rotation.y = Math.random() * Math.PI;
 
-		// --- GẮN DATA VÀO MESH (Cực kỳ quan trọng) ---
-		mesh.userData = {
-			name: data.name || "Ký ức vô danh",
-			role: data.role || "Thành viên lớp",
-			story: data.story || "Một khoảnh khắc đáng nhớ nhưng chưa được ghi lại chi tiết...",
-			isPlaceholder: !data.name // Đánh dấu nếu đây là dữ liệu trống
-		};
-
+		mesh.userData = { ...data, isPhoto: true };
 		scene.add(mesh);
 	});
 }
 
-// 3. XỬ LÝ CLICK (Raycasting)
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
+/* Tương tác */
 
-window.addEventListener('click', (event) => {
-	// Chuyển tọa độ chuột về hệ chuẩn của Three.js (-1 đến 1)
-	mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-	mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+function handleInteractions() {
 	raycaster.setFromCamera(mouse, camera);
 	const intersects = raycaster.intersectObjects(scene.children);
 
+	// Kiểm tra xem có va chạm với đối tượng nào không
 	if (intersects.length > 0) {
 		const target = intersects[0].object;
-		if (target.userData.name) {
-			// Đổ dữ liệu vào UI
-			document.getElementById('ui-name').innerText = target.userData.name;
-			document.getElementById('ui-role').innerText = target.userData.role;
-			document.getElementById('ui-story').innerText = target.userData.story;
-			// Hiện panel ra
-			infoUI.style.right = '0px';
+
+		// Nếu chạm vào một tấm ảnh và đó là tấm ảnh mới (tránh cập nhật UI liên tục)
+		if (target.userData.isPhoto) {
+			if (target !== hoveredObject) {
+				hoveredObject = target;
+
+				// Thêm dữ liệu vào UI
+				document.getElementById('ui-name').innerText = target.userData.name;
+				document.getElementById('ui-role').innerText = target.userData.role;
+				document.getElementById('ui-story').innerText = target.userData.story;
+
+				// Hiện panel
+				infoUI.style.right = '0px';
+				infoUI.style.pointerEvents = 'auto';
+				document.body.style.cursor = 'pointer';
+			}
+			// Nếu đang hover, thoát hàm không chạy phần "else" bên dưới
+			return;
 		}
 	}
+
+	// Pointer không chạm vào chạm vào vật thể
+	if (hoveredObject !== null) {
+		hoveredObject = null; // Reset biến tạm
+
+		// Thu panel
+		infoUI.style.right = '-400px';
+		infoUI.style.pointerEvents = 'none';
+		document.body.style.cursor = 'default';
+	}
+}
+
+// Update 1 frame ở trong loop animate()
+function updateFrame() {
+	const camDir = new THREE.Vector3();
+	camera.getWorldDirection(camDir);
+
+	scene.children.forEach(obj => {
+		if (!obj.userData.isPhoto) return;
+
+		const vToObj = obj.position.clone().sub(camera.position).normalize();
+		const dot = camDir.dot(vToObj);
+		const dist = camera.position.distanceTo(obj.position);
+
+		// Chỉ render vật thể khi vật thể nằm trong trường nhìn và không xa hơn renderDistance
+		if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
+			obj.visible = true;
+
+			// Fade in
+			obj.material.opacity = THREE.MathUtils.lerp(obj.material.opacity, 1, 0.05);
+
+			// Nếu ở quá gần (< 5 đơn vị), đảm bảo texture luôn đạt độ nét cao nhất
+			if (dist < 5) {
+				obj.material.precision = "highp";
+			}
+		} else {
+			// Nếu ở sau lưng hoặc quá xa: Tắt render
+			obj.visible = true;
+			obj.material.precision = 0;
+		}
+	});
+
+	handleInteractions(); // Gọi hàm Raycaster đã viết ở trên
+}
+
+// Event Listening
+
+window.addEventListener('mousemove', (e) => {
+	mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+	mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
 });
 
 loadMemories();
 
 
-/* PHẦN TÍNH TOÁN */
+/* Tính toán */
 
 // Chuyển động
 const clock = new THREE.Clock(); // Sử dụng với delta bên dưới để chuyển động mượt mà
 
 function animate() {
 	requestAnimationFrame(animate);
-
+	renderer.render(scene, camera);
+	updateFrame();
 	if (controls.isLocked) {
-		const delta = clock.getDelta(); // Khoảng cách cách mỗi frame: máy mạnh, frame cao, delta nhỏ, máy yếu frame thấp, delta cao
-		const speed = 100.0; // Tốc độ di chuyển
+		const delta = clock.getDelta(); // Khoảng cách mỗi frame: máy mạnh frame cao, delta nhỏ, máy yếu frame thấp, delta cao
+		const speed = 60.0; // Tốc độ di chuyển
 
 		// Giảm tốc
 		velocity.x -= velocity.x * 10.0 * delta;
