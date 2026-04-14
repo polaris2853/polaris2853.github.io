@@ -309,7 +309,7 @@ img {
 @media(max-width:400px) {
 	body {
 		margin: 0 0 4rem 0;
-		padding: 0 10rem 4rem 10rem;
+		padding: 0 0rem 4rem 0rem;
 	}
 	p {
 		font-size: 12px;
