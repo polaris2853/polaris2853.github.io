@@ -10,6 +10,14 @@ scene.fog = new THREE.FogExp2(0x000000, 0.1); // Sương mù
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
 camera.position.y = 1.8; // Chiều cao của góc nhìn
 
+// Các biến trạng thái cho điều khiển Mobile
+let isTouching = false;
+let previousTouch = { x: 0, y: 0 };
+let lat = 0, lon = 0; // Vĩ độ và kinh độ để tính toán hướng nhìn
+let lookSensitivity = 0.005; // Độ nhạy (tăng giảm tùy ý)
+let isMoving = false; // Trạng thái di chuyển cho Joystick
+let moveDir = { x: 0, y: 0 };
+
 const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
 	|| (window.innerWidth <= 1024);
 
@@ -22,6 +30,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0xffffff);
 document.body.appendChild(renderer.domElement);
+const whiteTexture = new THREE.TextureLoader().load('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+whiteTexture.minFilter = THREE.NearestFilter;
 
 // Điều khiển
 const controls = new PointerLockControls(camera, document.body);
@@ -109,7 +119,7 @@ if (isMobileOrTablet) {
 const SETTINGS = {
 	imagePath: 'asserts/img/',
 	jsonPath: 'asserts/img/images.json',
-	renderDistance: 30,
+	renderDistance: 50,
 	dotThreshold: 0.3 // Tích vô hướng góc nhìn khoảng 90-100 độ
 };
 
@@ -213,32 +223,122 @@ async function loadMemories() {
 	}
 }
 
+//function create3DFragment(url, data) {
+//	const loader = new THREE.ImageBitmapLoader();
+//	// Sử dụng ImageBitmapLoader thay cho TextureLoader tránh làm treo UI
+//	loader.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' });
+
+//	loader.load(url, (imageBitmap) => {
+//		const texture = new THREE.CanvasTexture(imageBitmap);
+//		texture.generateMipmaps = false;
+//		texture.minFilter = THREE.NearestFilter;
+
+//		const aspect = texture.image.width / texture.image.height;
+//		const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
+//		const material = new THREE.MeshBasicMaterial({
+//			map: texture,
+//			side: THREE.DoubleSide,
+//			transparent: false,
+//			opacity: 0 // Khởi tạo ẩn để fade-in ở UpdateFrame
+//		});
+
+//		const mesh = new THREE.Mesh(geometry, material);
+//		mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
+//		mesh.rotation.y = Math.random() * Math.PI;
+
+//		mesh.userData = { ...data, isPhoto: true };
+//		scene.add(mesh);
+//	});
+//}
+
 function create3DFragment(url, data) {
 	const loader = new THREE.ImageBitmapLoader();
-	// Sử dụng ImageBitmapLoader thay cho TextureLoader tránh làm treo UI
 	loader.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' });
 
-	loader.load(url, (imageBitmap) => {
-		const texture = new THREE.CanvasTexture(imageBitmap);
-		texture.generateMipmaps = false;
-		texture.minFilter = THREE.NearestFilter;
-
-		const aspect = texture.image.width / texture.image.height;
+	if (isMobileOrTablet) {
+		// Mobile
+		// Chúng ta giả định aspect ratio từ data (nếu có) hoặc mặc định 1.33 (4:3)
+		const aspect = data.aspect || 1.33;
 		const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
 		const material = new THREE.MeshBasicMaterial({
-			map: texture,
+			map: whiteTexture, // Sử dụng texture 1x1 dùng chung
 			side: THREE.DoubleSide,
-			transparent: false,
-			opacity: 0 // Khởi tạo ẩn để fade-in ở UpdateFrame
+			transparent: true,
+			opacity: 0.1
 		});
 
 		const mesh = new THREE.Mesh(geometry, material);
 		mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
 		mesh.rotation.y = Math.random() * Math.PI;
 
-		mesh.userData = { ...data, isPhoto: true };
+		// Lưu thông tin để load sau
+		mesh.userData = {
+			...data,
+			isPhoto: true,
+			realTextureUrl: url,
+			textureLoaded: false
+		};
 		scene.add(mesh);
-	});
+
+	} else {
+		// PC
+		loader.load(url, (imageBitmap) => {
+			const texture = new THREE.CanvasTexture(imageBitmap);
+			texture.generateMipmaps = false;
+			texture.minFilter = THREE.NearestFilter;
+
+			const aspect = texture.image.width / texture.image.height;
+			const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
+			const material = new THREE.MeshBasicMaterial({
+				map: texture,
+				side: THREE.DoubleSide,
+				transparent: true,
+				opacity: 0
+			});
+
+			const mesh = new THREE.Mesh(geometry, material);
+			mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
+			mesh.rotation.y = Math.random() * Math.PI;
+
+			mesh.userData = { ...data, isPhoto: true, textureLoaded: true };
+			scene.add(mesh);
+		});
+	}
+}
+
+// Khởi tạo loader dùng chung để không phải tạo mới liên tục
+const asyncLoader = new THREE.ImageBitmapLoader();
+asyncLoader.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' });
+
+function loadRealTexture(mesh) {
+	// Nếu đang tải hoặc đã tải rồi thì thoát
+	if (mesh.userData.loading || mesh.userData.textureLoaded) return;
+
+	mesh.userData.loading = true; // Đánh dấu trạng thái đang gánh dữ liệu
+
+	asyncLoader.load(mesh.userData.realTextureUrl,
+		(imageBitmap) => {
+			// Chuyển ImageBitmap thành Texture
+			const texture = new THREE.CanvasTexture(imageBitmap);
+			texture.generateMipmaps = false;
+			texture.minFilter = THREE.NearestFilter;
+
+			// Thay thế texture trắng bằng texture thật
+			mesh.material.map = texture;
+			mesh.material.transparent = true;
+			mesh.material.needsUpdate = true;
+
+			// Đánh dấu đã xong
+			mesh.userData.textureLoaded = true;
+			mesh.userData.loading = false;
+			mesh.material.opacity = 1;
+		},
+		undefined, // OnProgress (không cần)
+		(err) => {
+			console.error("Lỗi tải ký ức:", err);
+			mesh.userData.loading = false;
+		}
+	);
 }
 
 /* Tương tác */
@@ -246,7 +346,7 @@ function create3DFragment(url, data) {
 function handleInteractions() {
 	raycaster.setFromCamera(mouse, camera);
 	const intersects = raycaster.intersectObjects(scene.children);
-
+	raycaster.far = 5;
 	// Kiểm tra xem có va chạm với đối tượng nào không
 	if (intersects.length > 0) {
 		const target = intersects[0].object;
@@ -289,6 +389,38 @@ function handleInteractions() {
 }
 
 // Update 1 frame ở trong loop animate()
+//function updateFrame() {
+//	const camDir = new THREE.Vector3();
+//	camera.getWorldDirection(camDir);
+
+//	scene.children.forEach(obj => {
+//		if (!obj.userData.isPhoto) return;
+
+//		const vToObj = obj.position.clone().sub(camera.position).normalize();
+//		const dot = camDir.dot(vToObj);
+//		const dist = camera.position.distanceTo(obj.position);
+
+//		// Chỉ render vật thể khi vật thể nằm trong trường nhìn và không xa hơn renderDistance
+//		if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
+//			obj.visible = true;
+
+//			// Fade in
+//			obj.material.opacity = THREE.MathUtils.lerp(obj.material.opacity, 1, 0.05);
+
+//			// Nếu ở quá gần (< 5 đơn vị), đảm bảo texture luôn đạt độ nét cao nhất
+//			if (dist < 5) {
+//				obj.material.precision = "highp";
+//			}
+//		} else {
+//			// Nếu ở sau lưng hoặc quá xa
+//			obj.visible = true;
+//			obj.material.precision = "lowp";
+//		}
+//	});
+
+//	handleInteractions(); // Gọi hàm Raycaster đã viết ở trên
+//}
+
 function updateFrame() {
 	const camDir = new THREE.Vector3();
 	camera.getWorldDirection(camDir);
@@ -300,26 +432,68 @@ function updateFrame() {
 		const dot = camDir.dot(vToObj);
 		const dist = camera.position.distanceTo(obj.position);
 
-		// Chỉ render vật thể khi vật thể nằm trong trường nhìn và không xa hơn renderDistance
-		if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
-			obj.visible = true;
+		if (isMobileOrTablet) {
+			// MOBILE
 
-			// Fade in
-			obj.material.opacity = THREE.MathUtils.lerp(obj.material.opacity, 1, 0.05);
+			if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
+				obj.visible = true;
 
-			// Nếu ở quá gần (< 5 đơn vị), đảm bảo texture luôn đạt độ nét cao nhất
-			if (dist < 5) {
-				obj.material.precision = "highp";
+				// Kiểm tra xem có đang nhìn trực diện không
+				raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+				const intersects = raycaster.intersectObject(obj);
+
+				if (intersects.length > 0) {
+					loadRealTexture(obj); // Nhìn vào thì nạp
+					obj.material.precision = "highp";
+				} else {
+					// UNLOAD TEXTURE
+					// Ta có thể giữ lại texture nếu dist < 5
+					if (obj.userData.textureLoaded && dist > 8) {
+						unloadTexture(obj);
+					}
+					obj.material.precision = "lowp";
+				}
+			} else {
+				// Ngoài tầm nhìn hoặc quá xa
+				obj.visible = false;
+				if (obj.userData.textureLoaded) {
+					unloadTexture(obj);
+				}
 			}
 		} else {
-			// Nếu ở sau lưng hoặc quá xa
-			obj.visible = true;
-			obj.material.precision = "lowp";
+			// PC
+			if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
+				obj.visible = true;
+				obj.material.opacity = THREE.MathUtils.lerp(obj.material.opacity, 1, 0.05);
+			} else {
+				obj.visible = true;
+				obj.material.precision = "lowp";
+			}
 		}
 	});
 
-	handleInteractions(); // Gọi hàm Raycaster đã viết ở trên
+	handleInteractions();
 }
+
+// HÀM GIẢI PHÓNG VRAM
+function unloadTexture(mesh) {
+	if (!mesh.userData.textureLoaded) return;
+
+	// Giải phóng bộ nhớ của texture hiện tại
+	if (mesh.material.map && mesh.material.map !== whiteTexture) {
+		mesh.material.map.dispose();
+	}
+
+	// Trả về texture trắng ban đầu
+	mesh.material.map = whiteTexture;
+	mesh.material.opacity = 0.2; // Làm mờ đi để user biết là nó đã unload
+	mesh.material.needsUpdate = true;
+
+	// Reset trạng thái trong userData
+	mesh.userData.textureLoaded = false;
+	mesh.userData.loading = false;
+}
+
 
 // Event Listening: Di chuột
 
