@@ -68,8 +68,9 @@ if (isMobileOrTablet) {
 		zone: document.getElementById('joystick-zone'),
 		mode: 'static',
 		position: { left: '75px', bottom: '75px' },
-		color: '#66edff',
-		size: 100
+		color: '#555555',
+		size: 100,
+		zIndex: 2005
 	});
 
 	joystick.on('move', (evt, data) => {
@@ -103,7 +104,7 @@ if (isMobileOrTablet) {
 		const deltaY = touch.clientY - previousTouch.y;
 
 		// Cập nhật góc nhìn (nhân với độ nhạy)
-		lon += deltaX * lookSensitivity;
+		lon -= deltaX * lookSensitivity;
 		lat -= deltaY * lookSensitivity;
 
 		// Giới hạn góc ngước lên/cúi xuống để không bị lộn ngược camera
@@ -350,7 +351,7 @@ function loadRealTexture(mesh) {
 function handleInteractions() {
 	raycaster.setFromCamera(mouse, camera);
 	const intersects = raycaster.intersectObjects(scene.children);
-	raycaster.far = 5;
+	raycaster.far = 10;
 	// Kiểm tra xem có va chạm với đối tượng nào không
 	if (intersects.length > 0) {
 		const target = intersects[0].object;
@@ -558,18 +559,24 @@ function animate() {
 
 		// Joystick (Mobile)
 		if (isMoving) {
-			const speed = 0.15; // Tốc độ di chuyển mobile
-			// Di chuyển theo hướng camera đang nhìn (nhưng giữ nguyên độ cao Y)
+			const speed = 0.15;
+
+			// Lấy hướng nhìn của Camera
 			const forward = new THREE.Vector3();
 			camera.getWorldDirection(forward);
-			forward.y = 0;
+			forward.y = 0; // Đảm bảo không bay lên trời khi nhìn lên
 			forward.normalize();
 
-			const right = new THREE.Vector3().crossVectors(camera.up, forward).negate();
+			const right = new THREE.Vector3();
+			right.crossVectors(camera.up, forward).negate(); // Tính vector bên phải
 
-			// moveDir.y là lên/xuống của joystick, moveDir.x là trái/phải
-			camera.position.addScaledVector(forward, moveDir.y * speed);
-			camera.position.addScaledVector(right, moveDir.x * speed);
+			// nipplejs: data.vector.y dương là kéo lên, âm là kéo xuống
+			// Nhân với vector hướng để đi đúng hướng camera đang nhìn
+			const moveVector = new THREE.Vector3();
+			moveVector.addScaledVector(forward, moveDir.y * speed);
+			moveVector.addScaledVector(right, moveDir.x * speed);
+
+			camera.position.add(moveVector);
 		}
 	} else {
 		// PC
