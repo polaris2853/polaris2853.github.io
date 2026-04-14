@@ -356,6 +356,7 @@ function loadRealTexture(mesh) {
 /* Tương tác */
 
 function handleInteractions() {
+
 	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 	const intersects = raycaster.intersectObjects(scene.children);
 	raycaster.far = 10;
@@ -366,7 +367,7 @@ function handleInteractions() {
 		// Nếu chạm vào Sách
 		if (target.userData.isBook) {
 			document.body.style.cursor = 'pointer';
-			hoveringAnywhere = true;
+
 		}
 
 		// Nếu chạm vào một tấm ảnh và đó là tấm ảnh mới (tránh cập nhật UI liên tục)
@@ -618,12 +619,17 @@ window.addEventListener('resize', () => {
 });
 
 window.addEventListener('click', () => {
-	raycaster.setFromCamera(mouse, camera);
+
+	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 	const intersects = raycaster.intersectObjects(scene.children);
 
 	if (intersects.length > 0) {
 		const obj = intersects[0].object;
 		if (obj.userData.isBook && obj.userData.url) {
+
+			if (controls.isLocked) controls.unlock();
+
+			// Thực hiện chuyển hướng
 			window.location.href = obj.userData.url;
 		}
 	}
