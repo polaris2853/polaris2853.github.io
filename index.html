@@ -4,12 +4,15 @@
 <head>
 	<script type="module" src="JS/Register.js"></script>
 	<script type="module" src="JS/base.js"></script>
+	<script type="module" src="JS/glitch_reveal.js"></script>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>27yx's Memories</title>
 	<link rel="stylesheet" href="style/style.css">
 	<link rel="stylesheet" href="style/style_nav.css">
 	<link rel="stylesheet" href="style/color.css">
+	<link rel="stylesheet" href="style/effects.css">
+	<!--<link rel="stylesheet" href="style/style_timeline.css">-->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 
 </head>
@@ -30,17 +33,19 @@
 			<button id="login-btn">Login</button>
 		</nav>
 
-		<h1>Title goes here</h1>
+		<h1>A6's <span style="color: #66edff;">Archive</span></h1>
 	</header>
 
 	<main>
-		<p>
-			<strong>Lorem ipsum</strong> Lorem ipsum dolor sit amet,
-			consectetur adipiscing elit. Integer luctus nunc nunc, pharetra luctus metus ornare et.
-			Nullam sodales tellus id quam lacinia, vitae aliquam ante ultricies.
-			Nullam dictum eros ut dui dictum, in placerat dui volutpat.
-			Vestibulum magna eros, finibus sed rhoncus at, ultricies sit amet orci.
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+		<p class="centre" style="font-weight: 120">
+			<strong>"Tháng năm ấy không trở lại, nhưng ký ức thì còn mãi.</strong> Trang web này được viết nên để lưu giữ những mảnh ghép của tuổi 18 —
+			khi thế giới của chúng ta chỉ nhỏ bằng một lớp học, nhưng ước mơ thì bao la đến tận chân trời." <br />
+			Có một 12A6 luôn ồn ào trong ký ức của chúng tôi. Với 50 con người là 50 màu sắc riêng biệt, lớp chúng tôi đã tạo nên một bức tranh thanh
+			xuân không thể rực rỡ hơn.
+			Cảm ơn cô Đào Thị Hương, người đã luôn kiên nhẫn đồng hành và uốn nắn những đứa trẻ của lớp trở nên trưởng thành hơn mỗi ngày. <br />
+			Dù là lúc học tập căng thẳng hay những giờ chơi đùa nghịch ngợm,
+			12A6 vẫn luôn là một khối gắn kết, năng nổ và chưa bao giờ biết bỏ cuộc.
+			Đây là nơi lưu giữ những tiếng cười giòn tan nhất của tuổi 18.
 		</p>
 
 		<p><br /></p>
@@ -51,33 +56,65 @@
 			<section class="section-two">
 				<div class="container">
 					<p><h2>MỘT SỐ HÌNH ẢNH</h2></p><br>
-					<span>@A</span><br>
 					<br>
 					<div class="insta-imgs">
 						<div class="click-img" id="f-img-1" oncontextmenu="return false;">
-							<img src="asserts/img/about.jpeg">
+							<img src="asserts/timeline/IMG_3475.jpg">
 						</div>
 						<div class="click-img" id="f-img-2" oncontextmenu="return false;">
-							<img src="asserts/img/run.jpg">
+							<img src="asserts/timeline/_PAT7488.jpeg">
 						</div>
 						<div class="click-img" id="f-img-3" oncontextmenu="return false;">
-							<img src="asserts/img/teach.jpg" oncontextmenu="return false;">
+							<img src="asserts/timeline/IMG_20240126_213020.jpg" oncontextmenu="return false;">
 						</div>
 						<div class="click-img" id="f-img-4" oncontextmenu="return false;">
-							<img src="asserts/img/introduct.jpg">
+							<img src="asserts/timeline/IMG_9314.JPG">
 						</div>
-
 					</div>
 				</div>
+				<br><br><br>
+
 			</section>
 		</div>
 
 
 	</main>
 
+	<canvas id="canvas" style=" position: fixed; top: 0; left: 0; z-index:-1;"></canvas>
+	<script>
+		const canvas = document.getElementById('canvas');
+		const ctx = canvas.getContext('2d');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		let particles = [];
+		for (let i = 0; i < 100; i++) {
+			particles.push({
+				x: Math.random() * canvas.width,
+				y: Math.random() * canvas.height,
+				radius: Math.random() * 2,
+				speed: Math.random() * 0.5 + 0.1
+			});
+		}
+
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+			particles.forEach(p => {
+				ctx.beginPath();
+				ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+				ctx.fill();
+				p.y -= p.speed;
+				if (p.y < 0) p.y = canvas.height;
+			});
+			requestAnimationFrame(draw);
+		}
+		draw();
+	</script>
+
 	<footer>
-		<p>&copy; A6K63</p>
-		<p>A6K63</p>
+		<p>&copy; 12A6-K63</p>
+		<p><em>Rời xa để trưởng thành, ngoảnh lại để thấy nhau.</em></p>
 		<p>
 			<b>Liên hệ: </b><a href="mailto:polaris2853@proton.me">polaris2853@proton.me</a>
 			<div class="social-media">
@@ -86,8 +123,14 @@
 				<a target="_blank" href="https://www.tiktok.com/@nhungchukhia6"><i class="fa-brands fa-tiktok"></i></a>
 				<br>
 			</div>
-		<p><a href="#top" class="centre">Top</a></p>
+		<p><a href="#top" class="back-to-top">※</a></p>
+
+
 	</footer>
+	<div class="glitch-wrapper">
+		<a href="3D.html" class="glitch" id="glitch" data-text="MEMORIES VOID">MEMORIES VOID</a>
+	</div>
+	<br>
 </body>
 
 </html>

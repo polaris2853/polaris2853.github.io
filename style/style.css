@@ -1,14 +1,14 @@
-body {
+﻿body {
 	font-family: var(--sans-font), sans-serif;
 	font-size: 1.1rem;
 	margin: 0 0 4rem 0;
-	padding: 0 .5rem;
+	padding: 0 1rem 4rem 1rem;
 	background: var(--bg);
 	color: var(--text);
 }
 
 main {
-	margin-top: 3rem;
+	margin-top: 1px;
 }
 
 input {
@@ -169,10 +169,11 @@ ul li a {
 	z-index: 2;
 }
 
-@media(max-width:500px) {
+@media(max-width:400px) {
 	body {
 		margin: 0 0 4rem 0;
-		padding: 0 10px;
+		padding: 0 10rem 4rem 10rem;
+		font-size:small;
 	}
 }
 
@@ -243,15 +244,39 @@ img {
 	margin: 40px 0;
 }
 
+.insta-imgs {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+	gap: 15px; 
+}
+
+.click-img {
+	width: 90%;
+	aspect-ratio: 1.5 / 1;
+	overflow: hidden;
+	border-radius: 8px;
+}
+
+.click-img img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover; 
+	object-position: center; 
+	transition: transform 0.3s ease; 
+}
+
+.click-img img:hover {
+	transform: scale(1.1);
+}
+
 #f-img-1:hover,
 #f-img-2:hover,
 #f-img-3:hover,
 #f-img-4:hover {
-	transform: scale(1.05); /* zoom-in effect */
+	transform: scale(1.05);
 	transition: 0.4s;
 }
 
-/* zoom-in on mobile */
 #f-img-1:active,
 #f-img-2:active,
 #f-img-3:active,
@@ -260,32 +285,33 @@ img {
 	transition: 0.1s; 
 }
 
+/* Back to top */
+.back-to-top {
+	position: fixed;
+	bottom: 30px;
+	right: 30px;
+	width: 50px;
+	height: 50px;
+	color: #66edff;
 
-/* Leaderboard */
-.leaderboard-terminal {
-	background-color: #000000;
-	color: #04AA6D; /* Bright green text */
-	font-family: 'Courier New', monospace;
-	padding: 1rem;
-	border: 2px solid #04AA6D;
-	border-radius: 8px;
-	max-width: 600px;
-	margin: auto;
-	white-space: pre-line;
+	border-radius: 50%;
+	/* Căn giữa mũi tên */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-decoration: none;
+	font-size: 24px;
+	z-index: 2000;
+	backdrop-filter: blur(5px);
+	transition: all 0.3s ease;
 }
 
-#leaderboard {
-	width: 100%;
-	border-collapse: collapse;
-	padding: 5rem;
-}
-
-#leaderboard th, #leaderboard td {
-	border: 1px solid #04AA6D;
-	padding: 8px;
-	text-align: center;
-}
-
-#leaderboard th {
-	background-color: #333;
+@media(max-width:400px) {
+	body {
+		margin: 0 0 4rem 0;
+		padding: 0 10rem 4rem 10rem;
+	}
+	p {
+		font-size: 12px;
+	}
 }

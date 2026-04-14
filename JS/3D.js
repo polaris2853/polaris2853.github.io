@@ -1,16 +1,23 @@
 ﻿import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-/* SETUP CÁC ĐỊNH NGHĨA CƠ BẢN*/
+/* CÁC ĐỊNH NGHĨA CƠ BẢN */
 
 // Khung cảnh
 const scene = new THREE.Scene();
 scene.fog = new THREE.FogExp2(0x000000, 0.1); // Sương mù
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
-camera.position.y = 1.8; // Chiều cao góc nhìn
+camera.position.y = 1.8; // Chiều cao của góc nhìn
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+const isMobileOrTablet = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+	|| (window.innerWidth <= 1024);
+
+const renderer = new THREE.WebGLRenderer({
+	antialias: false,
+	powerPreference: "low-power",
+	failIfMajorPerformanceCaveat: false // Chạy kể cả khi hiệu năng thấp
+});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0xffffff);
@@ -44,7 +51,61 @@ function onKeyPress(event, isPressed) {
 	}
 }
 
-/* Render */
+// Joystick cho điện thoại
+if (isMobileOrTablet) {
+	// Joystick
+	const joystick = nipplejs.create({
+		zone: document.getElementById('joystick-zone'),
+		mode: 'static',
+		position: { left: '75px', bottom: '75px' },
+		color: '#66edff',
+		size: 100
+	});
+
+	joystick.on('move', (evt, data) => {
+		isMoving = true;
+		moveDir.x = data.vector.x;
+		moveDir.y = data.vector.y;
+	});
+
+	joystick.on('end', () => {
+		isMoving = false;
+		moveDir = { x: 0, y: 0 };
+	});
+
+	// Xoay màn hình bằng tay phải
+	window.addEventListener('touchstart', (e) => { // EventListener bắt đầu khi có chạm màn hình
+		// Chỉ nhận diện xoay nếu chạm vào nửa bên phải màn hình
+		if (e.touches[0].clientX > window.innerWidth / 2) {
+			isTouching = true;
+			previousTouch.x = e.touches[0].clientX;
+			previousTouch.y = e.touches[0].clientY;
+		}
+	}, { passive: false });
+
+	window.addEventListener('touchmove', (e) => { // Vuốt
+		if (!isTouching) return;
+		e.preventDefault(); // Chặn cuộn trang mặc định của điện thoại
+
+		const touch = e.touches[0];
+		const deltaX = touch.clientX - previousTouch.x;
+		const deltaY = touch.clientY - previousTouch.y;
+
+		lon -= deltaX * lookSensitivity;
+		lat -= deltaY * lookSensitivity;
+		lat = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, lat));
+
+		previousTouch.x = touch.clientX;
+		previousTouch.y = touch.clientY;
+	}, { passive: false });
+
+	window.addEventListener('touchend', () => {
+		isTouching = false;
+	});
+
+}
+
+/* Setting cho render */
 const SETTINGS = {
 	imagePath: 'asserts/img/',
 	jsonPath: 'asserts/img/images.json',
@@ -106,7 +167,36 @@ document.getElementById('close-ui').onclick = () => {
 	infoUI.style.pointerEvents = 'none';
 };
 
-/* Render */
+/* Render vật thể */
+
+// Vì chỉ render 1 vật thể nên có thể sử dụng TextureLoader cho đơn giản
+const textureLoader = new THREE.TextureLoader();
+
+// Vật thể: Sách
+const bookSize = { width: 0.6, height: 0.1, depth: 0.8 }; // Dimension của quyển sách
+const bookGeometry = new THREE.BoxGeometry(bookSize.width, bookSize.height, bookSize.depth);
+
+// Load texture bìa sách
+const bookTexture = textureLoader.load('asserts/img/book-cover.jpg');
+bookTexture.minFilter = THREE.NearestFilter;
+
+const bookMaterial = new THREE.MeshBasicMaterial({ map: bookTexture });
+const bookMesh = new THREE.Mesh(bookGeometry, bookMaterial);
+
+// Đặt quyển sách nằm trên mặt bục đá
+// Vị trí Y = Chiều cao bục + nửa chiều cao sách
+bookMesh.position.set(0, bookSize.height / 2, -5);
+
+bookMesh.rotation.y = Math.PI / -6; // Xoay sách khoảng -30 độ
+
+bookMesh.userData = {
+	isBook: true,
+	url: 'timeline.html' // Lưu đường dẫn cần chuyển hướng
+};
+
+scene.add(bookMesh);
+
+// Vật thể: Ảnh cá nhân
 
 async function loadMemories() {
 	try {
@@ -160,6 +250,12 @@ function handleInteractions() {
 	// Kiểm tra xem có va chạm với đối tượng nào không
 	if (intersects.length > 0) {
 		const target = intersects[0].object;
+
+		// Nếu chạm vào Sách
+		if (target.userData.isBook) {
+			document.body.style.cursor = 'pointer';
+			hoveringAnywhere = true;
+		}
 
 		// Nếu chạm vào một tấm ảnh và đó là tấm ảnh mới (tránh cập nhật UI liên tục)
 		if (target.userData.isPhoto) {
@@ -216,16 +312,16 @@ function updateFrame() {
 				obj.material.precision = "highp";
 			}
 		} else {
-			// Nếu ở sau lưng hoặc quá xa: Tắt render
+			// Nếu ở sau lưng hoặc quá xa
 			obj.visible = true;
-			obj.material.precision = 0;
+			obj.material.precision = "lowp";
 		}
 	});
 
 	handleInteractions(); // Gọi hàm Raycaster đã viết ở trên
 }
 
-// Event Listening
+// Event Listening: Di chuột
 
 window.addEventListener('mousemove', (e) => {
 	mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -276,4 +372,16 @@ window.addEventListener('resize', () => {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+window.addEventListener('click', () => {
+	raycaster.setFromCamera(mouse, camera);
+	const intersects = raycaster.intersectObjects(scene.children);
+
+	if (intersects.length > 0) {
+		const obj = intersects[0].object;
+		if (obj.userData.isBook && obj.userData.url) {
+			window.location.href = obj.userData.url;
+		}
+	}
 });

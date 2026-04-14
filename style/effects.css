@@ -1,28 +1,93 @@
-﻿
-/* Effects */
-.glow {
-    font-weight: bold;
-    text-align: center;
-    color: #fff; /* Text color */
-    text-shadow: 0 0 5px #fff, 0 0 10px #fff;
+﻿/* Import font từ Google */
+@import url('https://fonts.googleapis.com/css?family=Archivo+Black');
 
+.glitch-wrapper {
+	/* Cấu hình bao quát */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	overflow: hidden;
+	font-family: 'Archivo Black', sans-serif;
+	/* Logic của dòng chữ Glitch bên trong */
+	.glitch {
+	color: white;
+	text-transform: uppercase;
+	position: relative;
+	display: inline-block;
+	text-decoration: none;
+	/* Tạo 2 lớp giả (pseudo-elements) để làm nhiễu */
+		&::before, &::after {
+		content: attr(data-text);
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		clip: rect(0, 0, 0, 0); /* Mặc định ẩn bằng clip cổ điển */
+		}
+
+		/* Lớp màu Cyan (Xanh của dự án) */
+		&::before {
+			left: 3px;
+			text-shadow: -2px 0 #66edff;
+			animation: glitch-anim-1 0.5s infinite linear alternate-reverse;
+		}
+
+		/* Lớp màu Hồng (Chromatic Aberration) */
+		&::after {
+			left: -3px;
+			text-shadow: -2px 0 #ff00c1;
+			animation: glitch-anim-2 0.5s infinite linear alternate-reverse;
+		}
+
+	}
 }
 
-@keyframes glow {
-    0% {
-        text-shadow: 0 0 10px #000, 0 0 20px #000;
-    }
+/* Các khung hình chuyển động cắt lớp (Keyframes) */
+@keyframes glitch-anim-1 {
+	0% {
+		clip: rect(15px, 9999px, 10px, 0);
+	}
 
-    100% {
-        text-shadow: 0 0 10px #808080, 0 0 20px #fff;
-    }
+	20% {
+		clip: rect(0px, 9999px, 0px, 0);
+	}
+
+	40% {
+		clip: rect(15px, 9999px, 12px, 0);
+	}
+
+	60% {
+		clip: rect(4px, 9999px, 4px, 0);
+	}
+
+	80% {
+		clip: rect(11px, 9999px, 40px, 0);
+	}
+
+	100% {
+		clip: rect(10px, 9999px, 14px, 0);
+	}
 }
 
+@keyframes glitch-anim-2 {
+	0% {
+		clip: rect(11px, 9999px, 13px, 0);
+	}
 
-/* Specific for Playground */
-#playground-h1 {
-    width: 92%;
-    font-family: "VT323", monospace;
-    font-size: 4rem;
-    text-align: center;
+	25% {
+		clip: rect(10px, 9999px, 6px, 0);
+	}
+
+	50% {
+		clip: rect(8px, 9999px, 4px, 0);
+	}
+
+	75% {
+		clip: rect(15px, 9999px, 11px, 0);
+	}
+
+	100% {
+		clip: rect(4px, 9999px, 2px, 0);
+	}
 }

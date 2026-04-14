@@ -1,4 +1,9 @@
-﻿
+﻿:root {
+	--bg-color: #0a0a0c;
+	--text-glow: rgba(255, 255, 255, 0.8);
+	--glass: rgba(255, 255, 255, 0.05);
+}
+
 * {
 	box-sizing: border-box;
 }
@@ -9,7 +14,7 @@ html {
 
 header {
 	padding-bottom: 2rem;
-	border-bottom: 2px solid var(--text);
+	border-bottom: 1px solid var(--text);
 }
 
 header h1 {
@@ -307,6 +312,14 @@ h4,
 h5,
 h6 {
 	line-height: 1.2;
+}
+
+h1 {
+	text-align: center;
+	font-weight: 150;
+	letter-spacing: 8px;
+	text-transform: uppercase;
+	text-shadow: 0 0 15px var(--text-glow);
 }
 
 h2 {

@@ -4,13 +4,14 @@
 	<meta charset="UTF-8">
 	<title>27yx's Memories</title>
 	<script type="importmap" crossorigin="anonymous">
-				{
-					"imports": {
-						"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-						"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-					}
-				}
+		{
+			"imports": {
+				"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+				"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+			}
+		}
 	</script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.10.1/nipplejs.min.js"></script>
 	<script type="module" src="JS/Register.js"></script>
 	<script type="module" src="JS/base.js"></script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,9 +20,12 @@
 	<link rel="stylesheet" href="style/color.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 	<style>
-		body {
+		html, body {
 			margin: 0;
+			padding: 0;
 			overflow: hidden;
+			width: 100%;
+			height: 100%;
 		}
 
 		#crosshair {
@@ -54,11 +58,11 @@
 </head>
 <body>
 	<header>
-		<nav class="navbar" id="navbar">
+		<nav class="navbar" id="navbar" style="z-index:2001">
 			<button class="toggle-btn" type="button">☰</button>
-			<div id="nav-overlay"></div>
+			<div id="nav-overlay" style="z-index:2001"></div>
 
-			<ul class="nav-links" id="navLinks">
+			<ul class="nav-links" id="navLinks" style="z-index:2001">
 				<li><a href="index.html">Home</a></li>
 				<li><a href="timeline.html">Timeline</a></li>
 				<li><a href="3D.html">3D</a></li>
@@ -68,9 +72,17 @@
 			<button id="login-btn">Login</button>
 		</nav>
 	</header>
-	<div id="instructions">CLICK TO ENTER THE MEMORY VOID</div>
+	<div id="instructions" style="z-index: 1999;">CLICK TO ENTER THE MEMORY VOID</div>
 	<div id="crosshair"></div>
-
+	<div id="joystick-zone" style="
+		position: fixed;
+		bottom: 50px;
+		left: 50px;
+		width: 150px;
+		height: 150px;
+		z-index: 2000;
+		user-select: none;
+		touch-action: none;"></div>
 
 
 	<script type="module" src="JS/3D.js"></script>

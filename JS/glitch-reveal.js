@@ -23,13 +23,13 @@ function decryptText(element, finalText, speed = 50) {
     }, speed);
 }
 
-const playgroundHeader = document.getElementById("playground-h1");
+const playgroundHeader = document.getElementById("glitch");
 
 // Welcome line according to login state
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        decryptText(playgroundHeader, `Welcome, ${user.displayName || "User"}!`);
+        decryptText(playgroundHeader, `MEMORY VOID`);
     } else {
-        decryptText(playgroundHeader, "Welcome, Guest!");
+        decryptText(playgroundHeader, "MEMORY VOID");
     }
 });
