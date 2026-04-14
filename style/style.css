@@ -9,6 +9,7 @@
 
 main {
 	margin-top: 1px;
+	padding: 0 1rem;
 }
 
 input {
@@ -169,14 +170,6 @@ ul li a {
 	z-index: 2;
 }
 
-@media(max-width:400px) {
-	body {
-		margin: 0 0 4rem 0;
-		padding: 0 10rem 4rem 10rem;
-		font-size:small;
-	}
-}
-
 /* Format the accordion */
 details {
 	padding: .6rem 1rem;
@@ -309,7 +302,7 @@ img {
 @media(max-width:400px) {
 	body {
 		margin: 0 0 4rem 0;
-		padding: 0 0rem 4rem 0rem;
+		padding: 0 .5rem 4rem .5rem;
 	}
 	p {
 		font-size: 12px;
