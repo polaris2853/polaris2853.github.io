@@ -84,8 +84,8 @@ if (isMobileOrTablet) {
 	});
 
 	// Xoay màn hình bằng tay phải
-	window.addEventListener('touchstart', (e) => { // EventListener bắt đầu khi có chạm màn hình
-		// Chỉ nhận diện xoay nếu chạm vào nửa bên phải màn hình
+	window.addEventListener('touchstart', (e) => {
+		// Nhận diện chạm ở nửa phải màn hình để xoay
 		if (e.touches[0].clientX > window.innerWidth / 2) {
 			isTouching = true;
 			previousTouch.x = e.touches[0].clientX;
@@ -93,17 +93,21 @@ if (isMobileOrTablet) {
 		}
 	}, { passive: false });
 
-	window.addEventListener('touchmove', (e) => { // Vuốt
+	window.addEventListener('touchmove', (e) => {
 		if (!isTouching) return;
-		e.preventDefault(); // Chặn cuộn trang mặc định của điện thoại
+		e.preventDefault();
 
 		const touch = e.touches[0];
+		// Tính toán sự thay đổi vị trí ngón tay
 		const deltaX = touch.clientX - previousTouch.x;
 		const deltaY = touch.clientY - previousTouch.y;
 
-		lon -= deltaX * lookSensitivity;
+		// Cập nhật góc nhìn (nhân với độ nhạy)
+		lon += deltaX * lookSensitivity;
 		lat -= deltaY * lookSensitivity;
-		lat = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, lat));
+
+		// Giới hạn góc ngước lên/cúi xuống để không bị lộn ngược camera
+		lat = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, lat));
 
 		previousTouch.x = touch.clientX;
 		previousTouch.y = touch.clientY;
@@ -510,35 +514,85 @@ loadMemories();
 // Chuyển động
 const clock = new THREE.Clock(); // Sử dụng với delta bên dưới để chuyển động mượt mà
 
+//function animate() {
+//	requestAnimationFrame(animate);
+//	renderer.render(scene, camera);
+//	updateFrame();
+//	if (controls.isLocked) {
+//		const delta = clock.getDelta(); // Khoảng cách mỗi frame: máy mạnh frame cao, delta nhỏ, máy yếu frame thấp, delta cao
+//		const speed = 60.0; // Tốc độ di chuyển
+
+//		// Giảm tốc
+//		velocity.x -= velocity.x * 10.0 * delta;
+//		velocity.z -= velocity.z * 10.0 * delta;
+
+//		// Tình toán hướng di chuyển
+//		direction.z = Number(keys.forward) - Number(keys.backward);
+//		direction.x = Number(keys.right) - Number(keys.left);
+//		direction.normalize(); // tốc độ đồng đều khi di chuyển theo đường chéo
+
+//		// Vận tốc theo về các chiều
+//		if (keys.forward || keys.backward) velocity.z -= direction.z * speed * delta;
+//		if (keys.left || keys.right) velocity.x -= direction.x * speed * delta;
+
+//		// Chuyển động góc nhìn
+//		controls.moveRight(-velocity.x * delta);
+//		controls.moveForward(-velocity.z * delta);
+//	}
+
+//	renderer.render(scene, camera);
+//}
 function animate() {
 	requestAnimationFrame(animate);
-	renderer.render(scene, camera);
-	updateFrame();
-	if (controls.isLocked) {
-		const delta = clock.getDelta(); // Khoảng cách mỗi frame: máy mạnh frame cao, delta nhỏ, máy yếu frame thấp, delta cao
-		const speed = 60.0; // Tốc độ di chuyển
 
-		// Giảm tốc
-		velocity.x -= velocity.x * 10.0 * delta;
-		velocity.z -= velocity.z * 10.0 * delta;
+	const delta = clock.getDelta();
 
-		// Tình toán hướng di chuyển
-		direction.z = Number(keys.forward) - Number(keys.backward);
-		direction.x = Number(keys.right) - Number(keys.left);
-		direction.normalize(); // tốc độ đồng đều khi di chuyển theo đường chéo
+	if (isMobileOrTablet) {
+		// Camera movement (Mobile)
+		// Chuyển đổi lat/lon (độ) sang hướng nhìn của camera
+		const target = new THREE.Vector3();
+		target.x = camera.position.x + Math.sin(lon) * Math.cos(lat);
+		target.y = camera.position.y + Math.sin(lat);
+		target.z = camera.position.z + Math.cos(lon) * Math.cos(lat);
+		camera.lookAt(target);
 
-		// Vận tốc theo về các chiều
-		if (keys.forward || keys.backward) velocity.z -= direction.z * speed * delta;
-		if (keys.left || keys.right) velocity.x -= direction.x * speed * delta;
+		// Joystick (Mobile)
+		if (isMoving) {
+			const speed = 0.15; // Tốc độ di chuyển mobile
+			// Di chuyển theo hướng camera đang nhìn (nhưng giữ nguyên độ cao Y)
+			const forward = new THREE.Vector3();
+			camera.getWorldDirection(forward);
+			forward.y = 0;
+			forward.normalize();
 
-		// Chuyển động góc nhìn
-		controls.moveRight(-velocity.x * delta);
-		controls.moveForward(-velocity.z * delta);
+			const right = new THREE.Vector3().crossVectors(camera.up, forward).negate();
+
+			// moveDir.y là lên/xuống của joystick, moveDir.x là trái/phải
+			camera.position.addScaledVector(forward, moveDir.y * speed);
+			camera.position.addScaledVector(right, moveDir.x * speed);
+		}
+	} else {
+		// PC
+		if (controls.isLocked) {
+			const speed = 60.0;
+			velocity.x -= velocity.x * 10.0 * delta;
+			velocity.z -= velocity.z * 10.0 * delta;
+
+			direction.z = Number(keys.forward) - Number(keys.backward);
+			direction.x = Number(keys.right) - Number(keys.left);
+			direction.normalize();
+
+			if (keys.forward || keys.backward) velocity.z -= direction.z * speed * delta;
+			if (keys.left || keys.right) velocity.x -= direction.x * speed * delta;
+
+			controls.moveRight(-velocity.x * delta);
+			controls.moveForward(-velocity.z * delta);
+		}
 	}
 
+	updateFrame();
 	renderer.render(scene, camera);
 }
-
 animate();
 
 // Kích thước window
