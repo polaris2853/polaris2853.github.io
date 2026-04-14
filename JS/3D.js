@@ -42,11 +42,12 @@ instructions.addEventListener('click', () => {
 	// Lock chuột nếu KHÔNG PHẢI là mobile
 	if (!isMobileOrTablet) {
 		controls.lock();
-		controls.addEventListener('lock', () => instructions.style.display = 'none');
 	} else {
 		instructions.style.display = 'none';
 	}
 });
+controls.addEventListener('lock', () => instructions.style.display = 'none');
+controls.addEventListener('unlock', () => instructions.style.display = 'flex');
 
 scene.add(controls.getObject());
 
