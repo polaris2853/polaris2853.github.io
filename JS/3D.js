@@ -38,9 +38,15 @@ const controls = new PointerLockControls(camera, document.body);
 
 // UI
 const instructions = document.getElementById('instructions');
-instructions.addEventListener('click', () => controls.lock());
-controls.addEventListener('lock', () => instructions.style.display = 'none');
-controls.addEventListener('unlock', () => instructions.style.display = 'flex');
+instructions.addEventListener('click', () => {
+	// Lock chuột nếu KHÔNG PHẢI là mobile
+	if (!isMobileOrTablet) {
+		controls.lock();
+		controls.addEventListener('lock', () => instructions.style.display = 'none');
+	} else {
+		instructions.style.display = 'none';
+	}
+});
 
 scene.add(controls.getObject());
 
@@ -349,7 +355,7 @@ function loadRealTexture(mesh) {
 /* Tương tác */
 
 function handleInteractions() {
-	raycaster.setFromCamera(mouse, camera);
+	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 	const intersects = raycaster.intersectObjects(scene.children);
 	raycaster.far = 10;
 	// Kiểm tra xem có va chạm với đối tượng nào không
@@ -439,12 +445,13 @@ function updateFrame() {
 
 		if (isMobileOrTablet) {
 			// MOBILE
+			const centerScreen = new THREE.Vector2(0, 0);
 
 			if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
 				obj.visible = true;
 
 				// Kiểm tra xem có đang nhìn trực diện không
-				raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+				raycaster.setFromCamera(centerScreen, camera);
 				const intersects = raycaster.intersectObject(obj);
 
 				if (intersects.length > 0) {
