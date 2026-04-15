@@ -280,7 +280,7 @@ function create3DFragment(url, data) {
 		});
 
 		const mesh = new THREE.Mesh(geometry, material);
-		mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
+		mesh.position.set((Math.random() - 0.5) * 40, (Math.random() + 1.4), (Math.random() - 0.5) * 40);
 		mesh.rotation.y = Math.random() * Math.PI;
 
 		// Lưu thông tin để load sau
@@ -309,7 +309,7 @@ function create3DFragment(url, data) {
 			});
 
 			const mesh = new THREE.Mesh(geometry, material);
-			mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
+			mesh.position.set((Math.random() - 0.5) * 40, (Math.random() + 1.4), (Math.random() - 0.5) * 40);
 			mesh.rotation.y = Math.random() * Math.PI;
 
 			mesh.userData = { ...data, isPhoto: true, textureLoaded: true };

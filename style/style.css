@@ -7,6 +7,20 @@
 	color: var(--text);
 }
 
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Puts it behind everything */
+    background-image: url('../asserts/img/PAT8212.png');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.6); /* Use standard filter here for better performance */
+}
+
 main {
 	margin-top: 1px;
 	padding: 0 1rem;

@@ -176,7 +176,7 @@ details[open] summary::before {
   background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(30,87,153,1)), color-stop(100%,rgba(125,185,232,1)));
   background: -webkit-linear-gradient(top, rgba(80,80,80,0) 0%, rgb(80,80,80) 8%, rgb(80,80,80) 92%, rgba(80,80,80,0) 100%);
   background: -o-linear-gradient(top, rgba(80,80,80,0) 0%, rgb(80,80,80) 8%, rgb(80,80,80) 92%, rgba(80,80,80,0) 100%);
-  background: -ms-linear-gradient(top, rgba(80,80,80,0) 0%, rgb(80,80,80) 8%, rgb(80,80,80) 92%, rgba(80,80,80,0) 100%);
+/*  background: -ms-linear-gradient(top, rgba(80,80,80,0) 0%, rgb(80,80,80) 8%, rgb(80,80,80) 92%, rgba(80,80,80,0) 100%);*/
   background: linear-gradient(to bottom, rgba(80,80,80,0) 0%, rgb(80,80,80) 8%, rgb(80,80,80) 92%, rgba(80,80,80,0) 100%);
   
   z-index: 5;
@@ -298,16 +298,19 @@ details[open] summary::before {
 
 .direction-l .time-wrapper {
   float: left;
+  margin-left: -5%;
 }
 
 .direction-r .time-wrapper {
-  float: right;
+	float: right;
+	margin-right: -5%;
 }
 
 .time {
   display: inline-block;
   padding: 4px 6px;
   background: var(--bg);
+  border-radius:3px;
 }
 
 .desc {
@@ -394,22 +397,27 @@ details[open] summary::before {
 
 .direction-l .time-wrapper {
 	float: none;
+	margin-left:0;
+	margin-top:10px;
 }
 
 .direction-r .time-wrapper {
 	float: none;
+	margin-right:0;
+	margin-top:10px;
 }
+
 
 .desc {
 	position: relative;
-  margin: 1em 0.75em 1em 0;
+	margin: 1em 0.75em 1em 0;
 	padding: 1em;
 	background: var(--bg);
 	-webkit-box-shadow: 0 0 1px var(--header-bg);
 	-moz-box-shadow: 0 0 1px var(--header-bg);
 	box-shadow: 0 0 1px var(--header-bg);
-	
-  z-index: 15;
+	border-radius: 5px;
+	z-index: 15;
 }
 
 .direction-l .desc,
