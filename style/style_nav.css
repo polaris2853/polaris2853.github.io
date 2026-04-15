@@ -26,6 +26,18 @@ header h1 {
     overflow-wrap: break-word; /* Ensure wrapping of long words */
 }
 
+#h-container {
+	text-align: center;
+}
+#h-container h1 {
+	font-weight: 700;
+	font-family: 'Playwrite IE', cursive;
+	text-transform: none !important; /* Ép buộc không viết hoa toàn bộ */
+}
+
+#h-container small {
+	text-shadow: 1px 1px 15px var(--text-glow);
+}
 
 /* Format navigation */
 

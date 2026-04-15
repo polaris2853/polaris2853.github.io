@@ -18,7 +18,7 @@ body::before {
     background-image: url('../asserts/img/PAT8212.png');
     background-size: cover;
     background-position: center;
-    filter: brightness(0.6); /* Use standard filter here for better performance */
+    filter: brightness(0.55); /* Use standard filter here for better performance */
 }
 
 main {

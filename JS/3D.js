@@ -459,8 +459,8 @@ function handleInteractions() {
 			// Luôn đổi cursor nếu trong tầm 10 đơn vị
 			document.body.style.cursor = 'pointer';
 
-			// Hiện UI khi distance <= 2
-			if (distance <= 2) {
+			// Hiện UI khi distance <= 4
+			if (distance <= 4) {
 				if (target !== hoveredObject) {
 					hoveredObject = target;
 
@@ -473,7 +473,7 @@ function handleInteractions() {
 				}
 				return; // Thoát sớm để giữ trạng thái UI
 			}
-			// Nếu ở khoảng cách 2 < d <= 10: Vẫn chạm ảnh nhưng đóng UI
+			// Nếu ở khoảng cách 4 < d <= 10: Vẫn chạm ảnh nhưng đóng UI
 			else {
 				closeUI();
 			}
