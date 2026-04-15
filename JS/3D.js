@@ -162,7 +162,9 @@ Object.assign(infoUI.style, {
 	backdropFilter: 'blur(15px)', // Tăng độ nhòe
 	fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
 	overflowY: 'auto',
-	pointerEvents: 'none'
+	overflowX: 'hidden',
+	pointerEvents: 'auto', // Cho phép scroll
+	WebkitOverflowScrolling: 'touch', // Cho iOS
 });
 
 infoUI.innerHTML = `
@@ -355,49 +357,107 @@ function loadRealTexture(mesh) {
 
 /* Tương tác */
 
+//function handleInteractions() {
+
+//	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+//	const intersects = raycaster.intersectObjects(scene.children);
+//	raycaster.far = 10;
+//	// Kiểm tra xem có va chạm với đối tượng nào không
+//	if (intersects.length > 0) {
+//		const target = intersects[0].object;
+
+//		// Nếu chạm vào Sách
+//		if (target.userData.isBook) {
+//			document.body.style.cursor = 'pointer';
+
+//		}
+
+//		// Nếu chạm vào một tấm ảnh và đó là tấm ảnh mới (tránh cập nhật UI liên tục)
+//		if (target.userData.isPhoto) {
+//			if (target !== hoveredObject) {
+//				hoveredObject = target;
+
+//				// Thêm dữ liệu vào UI
+//				document.getElementById('ui-name').innerText = target.userData.name;
+//				document.getElementById('ui-role').innerText = target.userData.role;
+//				document.getElementById('ui-story').innerText = target.userData.story;
+
+//				// Hiện panel
+//				infoUI.style.right = '0px';
+//				infoUI.style.pointerEvents = 'auto';
+//				document.body.style.cursor = 'pointer';
+//			}
+//			// Nếu đang hover, thoát hàm không chạy phần "else" bên dưới
+//			return;
+//		}
+//	}
+
+//	// Pointer không chạm vào chạm vào vật thể
+//	if (hoveredObject !== null) {
+//		hoveredObject = null; // Reset biến tạm
+
+//		// Thu panel
+//		infoUI.style.right = '-400px';
+//		infoUI.style.pointerEvents = 'none';
+//		document.body.style.cursor = 'default';
+//	}
+//}
+
 function handleInteractions() {
-
+	// Đặt far mặc định là 10 để phát hiện vật thể từ xa (cho Cursor)
 	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-	const intersects = raycaster.intersectObjects(scene.children);
 	raycaster.far = 10;
-	// Kiểm tra xem có va chạm với đối tượng nào không
-	if (intersects.length > 0) {
-		const target = intersects[0].object;
 
-		// Nếu chạm vào Sách
+	const intersects = raycaster.intersectObjects(scene.children);
+
+	if (intersects.length > 0) {
+		const hit = intersects[0];
+		const target = hit.object;
+		const distance = hit.distance; // Khoảng cách từ camera đến vật thể
+
+		// 1. Logic cho Sách (Giữ nguyên hoặc tùy chỉnh distance nếu muốn)
 		if (target.userData.isBook) {
 			document.body.style.cursor = 'pointer';
-
 		}
 
-		// Nếu chạm vào một tấm ảnh và đó là tấm ảnh mới (tránh cập nhật UI liên tục)
+		// 2. Logic cho Ảnh
 		if (target.userData.isPhoto) {
-			if (target !== hoveredObject) {
-				hoveredObject = target;
+			// Luôn đổi cursor nếu trong tầm 10 đơn vị
+			document.body.style.cursor = 'pointer';
 
-				// Thêm dữ liệu vào UI
-				document.getElementById('ui-name').innerText = target.userData.name;
-				document.getElementById('ui-role').innerText = target.userData.role;
-				document.getElementById('ui-story').innerText = target.userData.story;
+			// CHỈ HIỆN UI KHI KHOẢNG CÁCH <= 2
+			if (distance <= 2) {
+				if (target !== hoveredObject) {
+					hoveredObject = target;
 
-				// Hiện panel
-				infoUI.style.right = '0px';
-				infoUI.style.pointerEvents = 'auto';
-				document.body.style.cursor = 'pointer';
+					document.getElementById('ui-name').innerText = target.userData.name;
+					document.getElementById('ui-role').innerText = target.userData.role;
+					document.getElementById('ui-story').innerText = target.userData.story;
+
+					infoUI.style.right = '0px';
+					infoUI.style.pointerEvents = 'auto';
+				}
+				return; // Thoát sớm để giữ trạng thái UI
 			}
-			// Nếu đang hover, thoát hàm không chạy phần "else" bên dưới
+			// Nếu ở khoảng cách 2 < d <= 10: Vẫn chạm ảnh nhưng UI phải đóng
+			else {
+				closeUI();
+			}
 			return;
 		}
 	}
 
-	// Pointer không chạm vào chạm vào vật thể
-	if (hoveredObject !== null) {
-		hoveredObject = null; // Reset biến tạm
+	// 3. Nếu không chạm gì cả
+	document.body.style.cursor = 'default';
+	closeUI();
+}
 
-		// Thu panel
-		infoUI.style.right = '-400px';
+// Hàm bổ trợ để đóng UI cho sạch code
+function closeUI() {
+	if (hoveredObject !== null) {
+		hoveredObject = null;
+		infoUI.style.right = '-450px'; // Khớp với CSS mới của bạn
 		infoUI.style.pointerEvents = 'none';
-		document.body.style.cursor = 'default';
 	}
 }
 
