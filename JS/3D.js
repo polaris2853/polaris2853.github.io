@@ -5,7 +5,7 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 
 // Khung cảnh
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.1); // Sương mù
+scene.fog = new THREE.FogExp2(0xffffff, 0.15); // Sương mù
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 50);
 camera.position.y = 1.8; // Chiều cao của góc nhìn
@@ -70,14 +70,21 @@ function onKeyPress(event, isPressed) {
 
 // Joystick cho điện thoại
 if (isMobileOrTablet) {
+	const joystickZone = document.getElementById('joystick-zone');
+
 	// Joystick
 	const joystick = nipplejs.create({
-		zone: document.getElementById('joystick-zone'),
+		zone: joystickZone,
 		mode: 'static',
 		position: { left: '75px', bottom: '75px' },
 		color: '#555555',
 		size: 100,
-		zIndex: 2005
+		zIndex: 1999
+	});
+
+	// Chặn sự kiện lan truyền tại vùng Joystick để không làm nhiễu Camera
+	['touchstart', 'touchmove', 'touchend'].forEach(evt => {
+		joystickZone.addEventListener(evt, (e) => e.stopPropagation(), { passive: false });
 	});
 
 	joystick.on('move', (evt, data) => {
@@ -91,40 +98,64 @@ if (isMobileOrTablet) {
 		moveDir = { x: 0, y: 0 };
 	});
 
-	// Xoay màn hình bằng tay phải
+	// QUẢN LÝ XOAY CAMERA (MULTI-TOUCH)
+	let activeTouchId = null; // ID của ngón tay đang dùng để xoay
+
 	window.addEventListener('touchstart', (e) => {
-		// Nhận diện chạm ở nửa phải màn hình để xoay
-		if (e.touches[0].clientX > window.innerWidth / 2) {
-			isTouching = true;
-			previousTouch.x = e.touches[0].clientX;
-			previousTouch.y = e.touches[0].clientY;
+		// Duyệt qua các điểm chạm mới
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			const touch = e.changedTouches[i];
+
+			// Nếu chạm ở nửa phải màn hình VÀ chưa có ngón tay nào đang xoay
+			if (touch.clientX > window.innerWidth / 2 && activeTouchId === null) {
+				activeTouchId = touch.identifier; // Lưu lại ID ngón tay này
+				isTouching = true;
+				previousTouch.x = touch.clientX;
+				previousTouch.y = touch.clientY;
+			}
 		}
 	}, { passive: false });
 
 	window.addEventListener('touchmove', (e) => {
 		if (!isTouching) return;
-		e.preventDefault();
 
-		const touch = e.touches[0];
-		// Tính toán sự thay đổi vị trí ngón tay
-		const deltaX = touch.clientX - previousTouch.x;
-		const deltaY = touch.clientY - previousTouch.y;
+		// Tìm đúng ngón tay đang đảm nhận việc xoay trong danh sách touches
+		let targetTouch = null;
+		for (let i = 0; i < e.touches.length; i++) {
+			if (e.touches[i].identifier === activeTouchId) {
+				targetTouch = e.touches[i];
+				break;
+			}
+		}
 
-		// Cập nhật góc nhìn (nhân với độ nhạy)
-		lon -= deltaX * lookSensitivity;
-		lat -= deltaY * lookSensitivity;
+		if (targetTouch) {
+			// Ngăn việc scroll trang khi đang xoay cam
+			if (e.cancelable) e.preventDefault();
 
-		// Giới hạn góc ngước lên/cúi xuống để không bị lộn ngược camera
-		lat = Math.max(-Math.PI / 2.1, Math.min(Math.PI / 2.1, lat));
+			const deltaX = targetTouch.clientX - previousTouch.x;
+			const deltaY = targetTouch.clientY - previousTouch.y;
 
-		previousTouch.x = touch.clientX;
-		previousTouch.y = touch.clientY;
+			// Cập nhật góc nhìn (nhân với độ nhạy)
+			lon -= deltaX * lookSensitivity;
+			lat -= deltaY * lookSensitivity;
+
+			// Giới hạn góc nhìn
+			lat = Math.max(-85 * (Math.PI / 180), Math.min(85 * (Math.PI / 180), lat));
+
+			previousTouch.x = targetTouch.clientX;
+			previousTouch.y = targetTouch.clientY;
+		}
 	}, { passive: false });
 
-	window.addEventListener('touchend', () => {
-		isTouching = false;
+	window.addEventListener('touchend', (e) => {
+		// Kiểm tra xem ngón tay vừa nhấc lên có phải là ngón tay đang xoay không
+		for (let i = 0; i < e.changedTouches.length; i++) {
+			if (e.changedTouches[i].identifier === activeTouchId) {
+				isTouching = false;
+				activeTouchId = null; // Giải phóng ID để ngón tay khác có thể dùng
+			}
+		}
 	});
-
 }
 
 /* Setting cho render */
@@ -148,12 +179,12 @@ Object.assign(infoUI.style, {
 	position: 'fixed',
 	top: '20px', // Cách mép trên
 	right: '-450px',
-	width: '380px',
+	width: 'min(380px, 60%)',
 	height: 'calc(100% - 40px)', // Cách mép dưới
 	// Gradient Xanh Teal + Tím nhạt + Hồng tro
 	background: 'linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(10, 40, 50, 0.5))',
 	color: 'white',
-	padding: '50px 40px',
+	padding: '40px 30px',
 	boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
 	border: '1px solid rgba(255, 255, 255, 0.18)',
 	borderRadius: '20px 0 0 20px', // Bo góc bên trái
@@ -165,12 +196,13 @@ Object.assign(infoUI.style, {
 	overflowX: 'hidden',
 	pointerEvents: 'auto', // Cho phép scroll
 	WebkitOverflowScrolling: 'touch', // Cho iOS
+	touchAction: 'pan-y'
 });
 
 infoUI.innerHTML = `
     <div id="close-ui" style="font-size: 1rem; margin-bottom: 5px; color: #fff; text-shadow: 0 0 10px rgba(102, 237, 255, 0.5);">✕ CLOSE</div>
     <div style="margin-top: 20px;">
-        <h2 id="ui-name" style="font-size: 2.2rem; font-weight: 300; letter-spacing: 2px; margin-bottom: 5px; color: #fff; text-shadow: 0 0 10px rgba(102, 237, 255, 0.5);"></h2>
+        <h2 id="ui-name" style="font-size: 2rem; font-weight: 300; letter-spacing: 2px; margin-bottom: 5px; color: #fff; text-shadow: 0 0 10px rgba(102, 237, 255, 0.5);"></h2>
         <div id="ui-role" style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 3px; color: #66edff; margin-bottom: 30px; opacity: 0.8;"></div>
     </div>
 
@@ -184,7 +216,12 @@ infoUI.innerHTML = `
     <div style="margin-top: 60px; font-size: 0.7rem; opacity: 0.3; letter-spacing: 1px;">
         MEMORIES VOID
     </div>`;
+
 document.body.appendChild(infoUI);
+// Ngăn chặn sự kiện chạm (touch) trên UI làm xoay Camera 3D bên dưới
+infoUI.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+infoUI.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+infoUI.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
 
 document.getElementById('close-ui').onclick = () => {
 	infoUI.style.right = '-400px';
@@ -207,8 +244,6 @@ bookTexture.minFilter = THREE.NearestFilter;
 const bookMaterial = new THREE.MeshBasicMaterial({ map: bookTexture });
 const bookMesh = new THREE.Mesh(bookGeometry, bookMaterial);
 
-// Đặt quyển sách nằm trên mặt bục đá
-// Vị trí Y = Chiều cao bục + nửa chiều cao sách
 bookMesh.position.set(0, bookSize.height / 2, -5);
 
 bookMesh.rotation.y = Math.PI / -6; // Xoay sách khoảng -30 độ
@@ -239,53 +274,99 @@ async function loadMemories() {
 
 //function create3DFragment(url, data) {
 //	const loader = new THREE.ImageBitmapLoader();
-//	// Sử dụng ImageBitmapLoader thay cho TextureLoader tránh làm treo UI
 //	loader.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' });
 
-//	loader.load(url, (imageBitmap) => {
-//		const texture = new THREE.CanvasTexture(imageBitmap);
-//		texture.generateMipmaps = false;
-//		texture.minFilter = THREE.NearestFilter;
-
-//		const aspect = texture.image.width / texture.image.height;
+//	if (isMobileOrTablet) {
+//		// Mobile
+//		// Chúng ta giả định aspect ratio từ data (nếu có) hoặc mặc định 1.33 (4:3)
+//		const aspect = data.aspect || 1.33;
 //		const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
 //		const material = new THREE.MeshBasicMaterial({
-//			map: texture,
+//			map: whiteTexture, // Sử dụng texture 1x1 dùng chung
 //			side: THREE.DoubleSide,
-//			transparent: false,
-//			opacity: 0 // Khởi tạo ẩn để fade-in ở UpdateFrame
+//			transparent: true,
+//			opacity: 0.1
 //		});
 
 //		const mesh = new THREE.Mesh(geometry, material);
-//		mesh.position.set((Math.random() - 0.5) * 60, (Math.random() + 1.2), (Math.random() - 0.5) * 60);
+//		mesh.position.set((Math.random() - 0.5) * 40, (Math.random() + 1.4), (Math.random() - 0.5) * 40);
 //		mesh.rotation.y = Math.random() * Math.PI;
 
-//		mesh.userData = { ...data, isPhoto: true };
+//		// Lưu thông tin để load sau
+//		mesh.userData = {
+//			...data,
+//			isPhoto: true,
+//			realTextureUrl: url,
+//			textureLoaded: false
+//		};
 //		scene.add(mesh);
-//	});
+
+//	} else {
+//		// PC
+//		loader.load(url, (imageBitmap) => {
+//			const texture = new THREE.CanvasTexture(imageBitmap);
+//			texture.generateMipmaps = false;
+//			texture.minFilter = THREE.NearestFilter;
+
+//			const aspect = texture.image.width / texture.image.height;
+//			const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
+//			const material = new THREE.MeshBasicMaterial({
+//				map: texture,
+//				side: THREE.DoubleSide,
+//				transparent: true,
+//				opacity: 0
+//			});
+
+//			const mesh = new THREE.Mesh(geometry, material);
+//			mesh.position.set((Math.random() - 0.5) * 40, (Math.random() + 1.4), (Math.random() - 0.5) * 40);
+//			mesh.rotation.y = Math.random() * Math.PI;
+
+//			mesh.userData = { ...data, isPhoto: true, textureLoaded: true };
+//			scene.add(mesh);
+//		});
+//	}
 //}
 
 function create3DFragment(url, data) {
 	const loader = new THREE.ImageBitmapLoader();
 	loader.setOptions({ imageOrientation: 'flipY', premultiplyAlpha: 'none' });
 
+	// Cấu hình chung
+	const posX = (Math.random() - 0.5) * 35;
+	const posY = (Math.random() + 1.4); // Độ cao ngẫu nhiên khoảng 1.4m - 2.4m
+	const posZ = (Math.random() - 0.5) * 35;
+	const rotationY = Math.random() * Math.PI;
+
+	// Dây treo tranh
+	const ropeHeight = 8; // Độ cao mà dây sẽ kéo lên
+	const points = [];
+	points.push(new THREE.Vector3(posX, posY + 0.4, posZ)); // Dây bắt đầu tại trung điểm đáy trên của ảnh
+	points.push(new THREE.Vector3(posX, posY + ropeHeight, posZ)); // Điểm kết thúc ở phía trên
+
+	const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+	const lineMaterial = new THREE.LineBasicMaterial({
+		color: 0x000000,
+		transparent: true,
+		opacity: 0.3 // Để dây mờ vào fog tạo hiệu ứng vô tận
+	});
+	const rope = new THREE.Line(lineGeometry, lineMaterial);
+	scene.add(rope);
+
+
 	if (isMobileOrTablet) {
-		// Mobile
-		// Chúng ta giả định aspect ratio từ data (nếu có) hoặc mặc định 1.33 (4:3)
 		const aspect = data.aspect || 1.33;
 		const geometry = new THREE.PlaneGeometry(0.8 * aspect, 0.8);
 		const material = new THREE.MeshBasicMaterial({
-			map: whiteTexture, // Sử dụng texture 1x1 dùng chung
+			map: whiteTexture,
 			side: THREE.DoubleSide,
 			transparent: true,
 			opacity: 0.1
 		});
 
 		const mesh = new THREE.Mesh(geometry, material);
-		mesh.position.set((Math.random() - 0.5) * 40, (Math.random() + 1.4), (Math.random() - 0.5) * 40);
-		mesh.rotation.y = Math.random() * Math.PI;
+		mesh.position.set(posX, posY, posZ);
+		mesh.rotation.y = rotationY;
 
-		// Lưu thông tin để load sau
 		mesh.userData = {
 			...data,
 			isPhoto: true,
@@ -295,7 +376,6 @@ function create3DFragment(url, data) {
 		scene.add(mesh);
 
 	} else {
-		// PC
 		loader.load(url, (imageBitmap) => {
 			const texture = new THREE.CanvasTexture(imageBitmap);
 			texture.generateMipmaps = false;
@@ -307,12 +387,12 @@ function create3DFragment(url, data) {
 				map: texture,
 				side: THREE.DoubleSide,
 				transparent: true,
-				opacity: 0
+				opacity: 1
 			});
 
 			const mesh = new THREE.Mesh(geometry, material);
-			mesh.position.set((Math.random() - 0.5) * 40, (Math.random() + 1.4), (Math.random() - 0.5) * 40);
-			mesh.rotation.y = Math.random() * Math.PI;
+			mesh.position.set(posX, posY, posZ);
+			mesh.rotation.y = rotationY;
 
 			mesh.userData = { ...data, isPhoto: true, textureLoaded: true };
 			scene.add(mesh);
@@ -357,52 +437,6 @@ function loadRealTexture(mesh) {
 
 /* Tương tác */
 
-//function handleInteractions() {
-
-//	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-//	const intersects = raycaster.intersectObjects(scene.children);
-//	raycaster.far = 10;
-//	// Kiểm tra xem có va chạm với đối tượng nào không
-//	if (intersects.length > 0) {
-//		const target = intersects[0].object;
-
-//		// Nếu chạm vào Sách
-//		if (target.userData.isBook) {
-//			document.body.style.cursor = 'pointer';
-
-//		}
-
-//		// Nếu chạm vào một tấm ảnh và đó là tấm ảnh mới (tránh cập nhật UI liên tục)
-//		if (target.userData.isPhoto) {
-//			if (target !== hoveredObject) {
-//				hoveredObject = target;
-
-//				// Thêm dữ liệu vào UI
-//				document.getElementById('ui-name').innerText = target.userData.name;
-//				document.getElementById('ui-role').innerText = target.userData.role;
-//				document.getElementById('ui-story').innerText = target.userData.story;
-
-//				// Hiện panel
-//				infoUI.style.right = '0px';
-//				infoUI.style.pointerEvents = 'auto';
-//				document.body.style.cursor = 'pointer';
-//			}
-//			// Nếu đang hover, thoát hàm không chạy phần "else" bên dưới
-//			return;
-//		}
-//	}
-
-//	// Pointer không chạm vào chạm vào vật thể
-//	if (hoveredObject !== null) {
-//		hoveredObject = null; // Reset biến tạm
-
-//		// Thu panel
-//		infoUI.style.right = '-400px';
-//		infoUI.style.pointerEvents = 'none';
-//		document.body.style.cursor = 'default';
-//	}
-//}
-
 function handleInteractions() {
 	// Đặt far mặc định là 10 để phát hiện vật thể từ xa (cho Cursor)
 	raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
@@ -415,17 +449,17 @@ function handleInteractions() {
 		const target = hit.object;
 		const distance = hit.distance; // Khoảng cách từ camera đến vật thể
 
-		// 1. Logic cho Sách (Giữ nguyên hoặc tùy chỉnh distance nếu muốn)
+		// Sách
 		if (target.userData.isBook) {
 			document.body.style.cursor = 'pointer';
 		}
 
-		// 2. Logic cho Ảnh
+		// Ảnh
 		if (target.userData.isPhoto) {
 			// Luôn đổi cursor nếu trong tầm 10 đơn vị
 			document.body.style.cursor = 'pointer';
 
-			// CHỈ HIỆN UI KHI KHOẢNG CÁCH <= 2
+			// Hiện UI khi distance <= 2
 			if (distance <= 2) {
 				if (target !== hoveredObject) {
 					hoveredObject = target;
@@ -439,7 +473,7 @@ function handleInteractions() {
 				}
 				return; // Thoát sớm để giữ trạng thái UI
 			}
-			// Nếu ở khoảng cách 2 < d <= 10: Vẫn chạm ảnh nhưng UI phải đóng
+			// Nếu ở khoảng cách 2 < d <= 10: Vẫn chạm ảnh nhưng đóng UI
 			else {
 				closeUI();
 			}
@@ -452,47 +486,16 @@ function handleInteractions() {
 	closeUI();
 }
 
-// Hàm bổ trợ để đóng UI cho sạch code
+// Hàm đóng UI
 function closeUI() {
 	if (hoveredObject !== null) {
 		hoveredObject = null;
-		infoUI.style.right = '-450px'; // Khớp với CSS mới của bạn
+		infoUI.style.right = '-450px';
 		infoUI.style.pointerEvents = 'none';
 	}
 }
 
 // Update 1 frame ở trong loop animate()
-//function updateFrame() {
-//	const camDir = new THREE.Vector3();
-//	camera.getWorldDirection(camDir);
-
-//	scene.children.forEach(obj => {
-//		if (!obj.userData.isPhoto) return;
-
-//		const vToObj = obj.position.clone().sub(camera.position).normalize();
-//		const dot = camDir.dot(vToObj);
-//		const dist = camera.position.distanceTo(obj.position);
-
-//		// Chỉ render vật thể khi vật thể nằm trong trường nhìn và không xa hơn renderDistance
-//		if (dot > SETTINGS.dotThreshold && dist < SETTINGS.renderDistance) {
-//			obj.visible = true;
-
-//			// Fade in
-//			obj.material.opacity = THREE.MathUtils.lerp(obj.material.opacity, 1, 0.05);
-
-//			// Nếu ở quá gần (< 5 đơn vị), đảm bảo texture luôn đạt độ nét cao nhất
-//			if (dist < 5) {
-//				obj.material.precision = "highp";
-//			}
-//		} else {
-//			// Nếu ở sau lưng hoặc quá xa
-//			obj.visible = true;
-//			obj.material.precision = "lowp";
-//		}
-//	});
-
-//	handleInteractions(); // Gọi hàm Raycaster đã viết ở trên
-//}
 
 function updateFrame() {
 	const camDir = new THREE.Vector3();
