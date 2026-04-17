@@ -465,7 +465,7 @@ function handleInteractions() {
 
 				if (target !== hoveredObject) {
 					hoveredObject = target;
-					trackInterest('photo_view', {
+					t_inter('photo_view', {
 						target_name: target.userData.name,
 						target_role: target.userData.role,
 						distance: Math.round(distance * 100) / 100,
