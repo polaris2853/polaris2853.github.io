@@ -467,8 +467,7 @@ function handleInteractions() {
 					hoveredObject = target;
 					t_inter('photo_view', {
 						target_name: target.userData.name,
-						target_role: target.userData.role,
-						distance: Math.round(distance * 100) / 100,
+
 						platform: isMobileOrTablet ? 'mobile' : 'pc'
 					});
 					document.getElementById('ui-name').innerText = target.userData.name;
