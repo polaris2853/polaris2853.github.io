@@ -1,5 +1,6 @@
 ﻿import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { t_inter } from './firebase.js';
 
 /* CÁC ĐỊNH NGHĨA CƠ BẢN */
 
@@ -461,9 +462,15 @@ function handleInteractions() {
 
 			// Hiện UI khi distance <= 4
 			if (distance <= 4) {
+
 				if (target !== hoveredObject) {
 					hoveredObject = target;
-
+					trackInterest('photo_view', {
+						target_name: target.userData.name,
+						target_role: target.userData.role,
+						distance: Math.round(distance * 100) / 100,
+						platform: isMobileOrTablet ? 'mobile' : 'pc'
+					});
 					document.getElementById('ui-name').innerText = target.userData.name;
 					document.getElementById('ui-role').innerText = target.userData.role;
 					document.getElementById('ui-story').innerText = target.userData.story;

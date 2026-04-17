@@ -44,7 +44,7 @@ export {
 	getAnalytics, logEvent
 };
 
-export const trackInterest = async (action, params = {}) => {
+export const t_inter = async (action, params = {}) => {
 	logEvent(analytics, action, params);
 
 	try {
