@@ -50,6 +50,31 @@ export {
  * @param {object} params
  */
 
+const getFingerprint = () => {
+	const canvas = document.createElement('canvas');
+	const gl = canvas.getContext('webgl');
+
+	const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+	const renderer = debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : "";
+
+	const data = [
+		navigator.userAgent,
+		navigator.language,
+		window.screen.colorDepth,
+		renderer,
+		new Date().getTimezoneOffset()
+	].join('|');
+
+	let hash = 0;
+	for (let i = 0; i < data.length; i++) {
+		hash = ((hash << 5) - hash) + data.charCodeAt(i);
+		hash |= 0;
+	}
+	return 'user_' + Math.abs(hash).toString(36);
+};
+
+const sessionId = getFingerprint();
+
 export const t_inter = async (action, params = {}) => {
 	logEvent(analytics, action, params);
 
@@ -67,7 +92,7 @@ export const t_inter = async (action, params = {}) => {
 		if (location.hostname === "localhost") console.error("Firestore Error:", e);
 	}
 
-	if (location.hostname === "localhost") {
+	if (location.hostname === "127.0.0.1") {
 		console.log(`[Intelligence - ${sessionId}]: ${action}`, params);
 	}
 };
