@@ -1,6 +1,6 @@
-// Firebase SDK (for GitHub Pages)
+﻿// Firebase SDK (for GitHub Pages)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+import { getAnalytics, logEvents } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 import {
     orderBy, limit, getFirestore, getDoc, increment, updateDoc,
     collection, addDoc, doc, setDoc, query, where, getDocs
@@ -41,4 +41,26 @@ export { signOut, auth, onAuthStateChanged, signInWithPopup, provider };
 export {
     db, getDoc, increment, updateDoc, collection, addDoc,
     doc, setDoc, query, where, getDocs, orderBy, limit
+};
+
+export const trackInterest = async (action, params = {}) => {
+	logEvent(analytics, action, params);
+
+	try {
+		await addDoc(collection(db, "user_logs"), {
+			sessionId: sessionId,
+			action: action,
+			data: params,
+			timestamp: serverTimestamp(),
+			userAgent: navigator.userAgent,
+			screenSize: `${window.innerWidth}x${window.innerHeight}`
+		});
+	} catch (e) {
+
+		if (location.hostname === "localhost") console.error("Firestore Error:", e);
+	}
+
+	if (location.hostname === "localhost") {
+		console.log(`[Intelligence - ${sessionId}]: ${action}`, params);
+	}
 };
