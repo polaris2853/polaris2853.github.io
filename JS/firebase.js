@@ -1,6 +1,6 @@
 ﻿// Firebase SDK (for GitHub Pages)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAnalytics, logEvents } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 import {
     orderBy, limit, getFirestore, getDoc, increment, updateDoc,
     collection, addDoc, doc, setDoc, query, where, getDocs
@@ -40,7 +40,8 @@ window.where = where;
 export { signOut, auth, onAuthStateChanged, signInWithPopup, provider };
 export {
     db, getDoc, increment, updateDoc, collection, addDoc,
-    doc, setDoc, query, where, getDocs, orderBy, limit
+	doc, setDoc, query, where, getDocs, orderBy, limit, 
+	getAnalytics, logEvent
 };
 
 export const trackInterest = async (action, params = {}) => {
