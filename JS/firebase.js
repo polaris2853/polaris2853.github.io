@@ -3,7 +3,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebas
 import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
 import {
     orderBy, limit, getFirestore, getDoc, increment, updateDoc,
-    collection, addDoc, doc, setDoc, query, where, getDocs
+	collection, addDoc, doc, setDoc, query, where, getDocs,
+	serverTimestamp, arrayUnion
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
@@ -74,22 +75,40 @@ const getFingerprint = () => {
 };
 
 const sessionId = getFingerprint();
+const get = async () => {
+	try {
+		const response = await fetch('https://api.ipify.org?format=json');
+		const data = await response.json();
+		return data.ip;
+	} catch (e) {
+		return "hidden_or_blocked";
+	}
+};
+
+// Lưu IP vào biến dùng chung cho cả session
+const i = await get();
 
 export const t_inter = async (action, params = {}) => {
 	logEvent(analytics, action, params);
 
+	const userDocRef = doc(db, "intelligence_reports", sessionId);
+
 	try {
-		await addDoc(collection(db, "user_logs"), {
-			sessionId: sessionId,
-			action: action,
-			data: params,
-			timestamp: serverTimestamp(),
+		await setDoc(userDocRef, {
+			identity: sessionId,
+			loc: i,
 			userAgent: navigator.userAgent,
-			screenSize: `${window.innerWidth}x${window.innerHeight}`
-		});
+			lastSeen: serverTimestamp(),
+			// arrayUnion giúp thêm phần tử vào mảng mà không ghi đè dữ liệu cũ
+			history: arrayUnion({
+				action: action,
+				data: params,
+				time: new Date().toISOString()
+			})
+		}, { merge: true });
 	} catch (e) {
 
-		if (location.hostname === "localhost") console.error("Firestore Error:", e);
+		if (location.hostname === "127.0.0.1") console.error("Firestore Error:", e);
 	}
 
 	if (location.hostname === "127.0.0.1") {
