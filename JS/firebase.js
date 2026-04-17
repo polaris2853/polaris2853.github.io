@@ -45,9 +45,9 @@ export {
 };
 
 /**
- * Hàm ghi lại hành vi người dùng (HUMINT)
- * @param {string} action - Hành động (vd: 'view_photo', 'enter_space')
- * @param {object} params - Thông tin chi tiết (vd: { target: 'Student_A' })
+ * 
+ * @param {string} action
+ * @param {object} params
  */
 
 export const t_inter = async (action, params = {}) => {
