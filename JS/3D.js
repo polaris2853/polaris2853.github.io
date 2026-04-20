@@ -460,8 +460,8 @@ function handleInteractions() {
 			// Luôn đổi cursor nếu trong tầm 10 đơn vị
 			document.body.style.cursor = 'pointer';
 
-			// Hiện UI khi distance <= 4
-			if (distance <= 4) {
+			// Hiện UI khi distance <= 2
+			if (distance <= 2) {
 
 				if (target !== hoveredObject) {
 					hoveredObject = target;
