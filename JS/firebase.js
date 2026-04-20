@@ -136,7 +136,7 @@ export const t_inter = async (action, params = {}) => {
 
 		if (action === 'photo_view' && params.target_name) {
 
-			const rankingDocRef = doc(db, "rankings", params.target_name);
+			const rankingDocRef = doc(db, "ranking", params.target_name);
 
 			batch.set(rankingDocRef, {
 				target_name: params.target_name, 

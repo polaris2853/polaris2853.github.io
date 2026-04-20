@@ -1,0 +1,64 @@
+﻿.leaderboard-terminal {
+	width: 100%;
+	max-width: 600px;
+	margin: 2rem auto;
+	border-collapse: separate;
+	border-spacing: 0 12px;
+	font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	color: #5d546d;
+}
+
+	.leaderboard-terminal thead th {
+		text-transform: uppercase;
+		letter-spacing: 2px;
+		font-size: 0.85rem;
+		padding-bottom: 10px;
+		color: #ff7aff;
+		text-align: left;
+		padding-left: 20px;
+	}
+
+	.leaderboard-terminal tbody tr {
+/*		background-color: #ffffff;*/
+		transition: transform 0.2s ease, box-shadow 0.2s ease;
+		cursor: default;
+	}
+
+
+		.leaderboard-terminal tbody td:first-child {
+			background-color: #ffffff;
+			border-radius: 20px 0 0 20px;
+		}
+
+		.leaderboard-terminal tbody tr td:last-child {
+			text-align: right;
+			padding-right: 30px;
+			font-weight: bold;
+			background-color: #ffffff;
+			border-radius: 0 20px 20px 0;
+			color: #ff8eb1;
+		}
+		.leaderboard-terminal tbody tr:first-child td {
+			background-color: #ffffff;
+			box-shadow: 0 8px 25px #ffbc9ecc;
+		}
+
+	.leaderboard-terminal tbody td {
+		padding: 18px 20px;
+		border: none;
+		font-size: 1rem;
+		background-color: #ffffff;
+
+	}
+
+	.leaderboard-terminal tbody tr:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 8px 25px rgba(220, 210, 235, 0.8);
+	}
+
+	.leaderboard-terminal tbody td:first-child {
+		font-weight: 900;
+		color: #b1a7c1;
+		width: 50px;
+	}
+
