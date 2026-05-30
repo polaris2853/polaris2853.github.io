@@ -187,3 +187,83 @@ video::-moz-media-controls {
 video::-webkit-media-controls-enclosure {
 	background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0) 100%) !important;
 }
+
+
+dialog.lightbox {
+	border: none;
+	background: transparent;
+	max-width: 100vw;
+	max-height: 100vh;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+	/* Open state display controller */
+	dialog.lightbox[open] {
+		display: flex;
+	}
+
+	/* The native backdrop layer (Frosted dark background) */
+	dialog.lightbox::backdrop {
+		background: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(8px);
+	}
+
+/* Main Container spacing */
+.lightbox-content {
+	position: relative;
+	max-width: 90vw;
+	max-height: 85vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+	/* Image & Video responsiveness constraints */
+	.lightbox-content img,
+	.lightbox-content video {
+		max-width: 100%;
+		max-height: 85vh;
+		object-fit: contain;
+		border-radius: 8px;
+		box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+	}
+
+/* Sticky Exit 'X' Button styling matching your dark theme */
+.lightbox-close {
+	position: absolute;
+	top: 24px;
+	right: 24px;
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #e0e0e0;
+	font-size: 28px;
+	line-height: 1;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	z-index: 100;
+}
+
+	.lightbox-close:hover {
+		background: #222;
+		border-color: #555;
+		color: #fff;
+		transform: scale(1.05);
+	}
+
+/* Lock scroll frame background when asset view is open */
+body:has(dialog[open]) {
+	overflow: hidden;
+}

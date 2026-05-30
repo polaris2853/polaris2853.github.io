@@ -54,6 +54,14 @@
 
 	</main>
 
+	<dialog id="lightbox-modal" class="lightbox">
+		<button class="lightbox-close" id="lightbox-close-btn" aria-label="Close view">×</button>
+		<div class="lightbox-content">
+			<img id="lightbox-img" src="" alt="Enlarged preview" class="hidden">
+			<video id="lightbox-video" controls class="hidden"></video>
+		</div>
+	</dialog>
+
 	<canvas id="canvas" style=" position: fixed; top: 0; left: 0; z-index:-1;"></canvas>
 	<script>
 		const canvas = document.getElementById('canvas');

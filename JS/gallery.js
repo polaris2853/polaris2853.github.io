@@ -236,7 +236,7 @@ function renderNextChunk() {
 			const completeUrl = `${BUCKET_BASE_URL}${currentFolderData.path}/${fileName}`;
 
 			chunkHTML += `
-                <div class="item-card">
+                <div class="item-card" onclick="openLightbox('${completeUrl}', 'image')">
                     <div class="image-stack">
                         <div class="photo layer-1">
                             <img src="${completeUrl}" alt="Item ${paddedNumber}" loading="lazy">
@@ -375,3 +375,48 @@ function showFolderView() {
 
 // Kick off initial compilation when the document is parsed
 initGallery();
+
+
+// DIALOG script
+// Grab Lightbox DOM Elements
+const lightboxModal = document.getElementById("lightbox-modal");
+const lightboxImg = document.getElementById("lightbox-img");
+const lightboxVideo = document.getElementById("lightbox-video");
+const lightboxCloseBtn = document.getElementById("lightbox-close-btn");
+
+/**
+ * Intercepts asset path data and launches the top-layer view panel
+ */
+function openLightbox(src, type) {
+	// Reset views
+	lightboxImg.classList.add("hidden");
+	lightboxVideo.classList.add("hidden");
+	lightboxImg.src = "";
+	lightboxVideo.src = "";
+
+	if (type === "image") {
+		lightboxImg.src = src;
+		lightboxImg.classList.remove("hidden");
+	} else if (type === "video") {
+		lightboxVideo.src = src;
+		lightboxVideo.classList.remove("hidden");
+		lightboxVideo.play().catch(() => { }); // Optional autoplay on load
+	}
+
+	lightboxModal.showModal(); // Launches native high-priority overlay layer
+}
+
+function closeLightbox() {
+	lightboxModal.close();
+	lightboxVideo.pause(); // Kills video audio tracks instantly upon exiting
+	lightboxImg.src = "";
+	lightboxVideo.src = "";
+}
+
+// Close Triggers
+lightboxCloseBtn.addEventListener("click", closeLightbox);
+
+// Close if user clicks outside the image frame on the dark backdrop array
+lightboxModal.addEventListener("click", (e) => {
+	if (e.target === lightboxModal) closeLightbox();
+});
