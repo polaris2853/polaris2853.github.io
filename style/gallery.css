@@ -1,9 +1,17 @@
-﻿/* Container for the whole grid of folders */
+﻿/*main * {
+	outline: 1px solid red !important;
+}*/
+
+/* Container for the whole grid of folders */
 .folder-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 	gap: 40px;
 	padding: 40px;
+	justify-content: center;
+	width: 100% !important;
+	box-sizing: border-box !important;
+	max-width: 100% !important;
 }
 
 /* Individual folder layout */
@@ -16,7 +24,7 @@
 
 /* The stack boundary */
 .image-stack {
-	padding: 10px;
+	margin: 10px;
 	position: relative;
 	width: 150px;
 	height: 150px;
@@ -41,7 +49,6 @@
 	transform: rotate(2deg);
 	z-index: 3;
 	background: #222; /* Base color of the photo frame */
-	padding: 8px; /* This shrinks the image away from the edges */
 }
 
 	/* The actual preview image inside the top card */
@@ -137,7 +144,8 @@
 	.folder-grid {
 		grid-template-columns: repeat(2, 1fr);
 		gap: 24px; /* Narrower gap to save screen estate */
-		padding: 20px;
+		padding: 20px 1rem;
+		justify-content: center;
 	}
 
 	/* Shrink the stack boxes so two of them fit side-by-side */
@@ -161,53 +169,11 @@
 
 	/* Re-expand the stack box real estate so fingers have a wider landing pad */
 	.item-card .image-stack {
-		width: 140px; 
-		height: 140px;
+		width: 130px; 
+		height: 130px;
 	}
 
-	/* Force the video element to break out of layer depth restrictions */
-	.item-card video {
-		position: relative;
-		z-index: 10; /* Elevates player controls directly to the top layer */
-		pointer-events: auto !important; /* Forces the mobile browser to prioritize this tap destination */
-	}
-
-	/* 4. Force WebKit/iOS engine to reveal hidden media player controls */
-	video::-webkit-media-controls {
-		display: flex !important;
-	}
-
-	video::-webkit-media-controls-fullscreen-button {
-		display: inline-block !important; /* Restores the missing expand button */
-	}
-
-	video::-webkit-media-controls-panel {
-		display: flex !important;
-		opacity: 1 !important;
-		visibility: visible !important;
-		transition: none !important; /* Kills the browser's native fade-out animation */
-	}
-
-	/* Hard-locks the container enclosing the play, volume, and fullscreen buttons */
-	video::-webkit-media-controls-enclosure {
-		display: flex !important;
-		opacity: 1 !important;
-		visibility: visible !important;
-	}
-
-	/* Ensure controls don't hide on standard modern standard layouts */
-	video::media-controls-panel {
-		display: flex !important;
-		opacity: 1 !important;
-		visibility: visible !important;
-	}
-}
-
-video::-webkit-media-controls-panel {
-	display: flex !important;
-	opacity: 1 !important;
-	visibility: visible !important;
-	transition: none !important; /* Fully stops the fading animation engine */
+	
 }
 
 /* For Gecko Browsers (Desktop Firefox, Firefox Mobile) */

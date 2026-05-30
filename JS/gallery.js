@@ -3,10 +3,10 @@ const BUCKET_BASE_URL = "https://pub-d0ee6bf954ad4bb68d200ac965c57765.r2.dev/";
 
 
 const galleryRegistry = [
-	{ type: "sequence", label: "May 01", path: "May_01", totalCount: 2030 },
-	{ type: "sequence", label: "May 02", path: "May_02", totalCount: 1400 },
-	{ type: "sequence", label: "May 03", path: "May_03", totalCount: 998 },
-	{ type: "sequence", label: "May 04", path: "May_04", totalCount: 1200 },
+	{ type: "sequence", label: "Máy 01", path: "May_01", totalCount: 2030 },
+	{ type: "sequence", label: "Máy 02", path: "May_02", totalCount: 1400 },
+	{ type: "sequence", label: "Máy 03", path: "May_03", totalCount: 998 },
+	{ type: "sequence", label: "Máy 04", path: "May_04", totalCount: 1200 },
 
 	{ type: "sequence", label: "Sequence - Cá Nhân", path: "Sequence/ca_nhan", totalCount: 49 },
 	{ type: "sequence", label: "Sequence - Current", path: "Sequence/current", totalCount: 51 },
@@ -80,38 +80,104 @@ const backButton = document.getElementById("back-button");
 /**
  * Renders the home screen folder stack selection grid on page load
  */
+//function initGallery() {
+//	folderView.innerHTML = ""; // Clear existing grid layout
+
+//	galleryRegistry.forEach((folder, index) => {
+//		let img1, img2, img3;
+
+//		if (folder.type === "video") {
+//			// Uses a local image fallback for the video folder to preserve the uniform layout
+//			img1 = "asserts/img/01. Lê Công Hải Anh.webp";
+//			img2 = "asserts/img/01. Lê Công Hải Anh.webp";
+//			img3 = "asserts/img/01. Lê Công Hải Anh.webp";
+//		} else {
+//			// WebP folders pull their preview assets dynamically right from R2
+//			img1 = `${BUCKET_BASE_URL}${folder.path}/Image01.webp`;
+//			img2 = `${BUCKET_BASE_URL}${folder.path}/Image02.webp`;
+//			img3 = `${BUCKET_BASE_URL}${folder.path}/Image03.webp`;
+//		}
+
+//		// Generate the folder card HTML structure
+//		const folderHTML = `
+//            <div class="folder-card" onclick="openFolder(${index})">
+//                <div class="image-stack">
+//                    <div class="photo layer-3" style="background-image: url('${img3}'); background-size: cover; background-position: center;"></div>
+//                    <div class="photo layer-2" style="background-image: url('${img2}'); background-size: cover; background-position: center;"></div>
+//                    <div class="photo layer-1">
+//                        <img src="${img1}" alt="${folder.label} Cover" loading="lazy">
+//                    </div>
+//                </div>
+//                <h3 class="folder-label">${folder.label}</h3>
+//            </div>
+//        `;
+//		folderView.insertAdjacentHTML("beforeend", folderHTML);
+//	});
+//}
+
 function initGallery() {
-	folderView.innerHTML = ""; // Clear existing grid layout
+	folderView.innerHTML = ""; // Clear existing layout
 
 	galleryRegistry.forEach((folder, index) => {
 		let img1, img2, img3;
 
 		if (folder.type === "video") {
-			// Uses a local image fallback for the video folder to preserve the uniform layout
+			// Local fallback covers (no network overhead)
 			img1 = "asserts/img/01. Lê Công Hải Anh.webp";
 			img2 = "asserts/img/01. Lê Công Hải Anh.webp";
 			img3 = "asserts/img/01. Lê Công Hải Anh.webp";
+
+			// Render video folder instantly since assets are local
+			const folderHTML = `
+                <div class="folder-card" onclick="openFolder(${index})">
+                    <div class="image-stack">
+                        <div class="photo layer-3" style="background-image: url('${img3}'); background-size: cover; background-position: center;"></div>
+                        <div class="photo layer-2" style="background-image: url('${img2}'); background-size: cover; background-position: center;"></div>
+                        <div class="photo layer-1">
+                            <img src="${img1}" alt="${folder.label} Cover">
+                        </div>
+                    </div>
+                    <h3 class="folder-label">${folder.label}</h3>
+                </div>
+            `;
+			folderView.insertAdjacentHTML("beforeend", folderHTML);
 		} else {
-			// WebP folders pull their preview assets dynamically right from R2
+
 			img1 = `${BUCKET_BASE_URL}${folder.path}/Image01.webp`;
 			img2 = `${BUCKET_BASE_URL}${folder.path}/Image02.webp`;
 			img3 = `${BUCKET_BASE_URL}${folder.path}/Image03.webp`;
-		}
 
-		// Generate the folder card HTML structure
-		const folderHTML = `
-            <div class="folder-card" onclick="openFolder(${index})">
-                <div class="image-stack">
-                    <div class="photo layer-3" style="background-image: url('${img3}'); background-size: cover; background-position: center;"></div>
-                    <div class="photo layer-2" style="background-image: url('${img2}'); background-size: cover; background-position: center;"></div>
-                    <div class="photo layer-1">
-                        <img src="${img1}" alt="${folder.label} Cover" loading="lazy">
+			const folderHTML = `
+                <div class="folder-card" onclick="openFolder(${index})">
+                    <div class="image-stack">
+                        <div class="photo layer-3 deferred-bg" data-src="${img3}"></div>
+                        <div class="photo layer-2 deferred-bg" data-src="${img2}"></div>
+                        <div class="photo layer-1">
+                            <img class="deferred-img" data-src="${img1}" alt="${folder.label} Cover" loading="lazy">
+                        </div>
                     </div>
+                    <h3 class="folder-label">${folder.label}</h3>
                 </div>
-                <h3 class="folder-label">${folder.label}</h3>
-            </div>
-        `;
-		folderView.insertAdjacentHTML("beforeend", folderHTML);
+            `;
+			folderView.insertAdjacentHTML("beforeend", folderHTML);
+		}
+	});
+
+	window.addEventListener("DOMContentLoaded", () => {
+		setTimeout(() => {
+			const deferredBgs = document.querySelectorAll('.deferred-bg');
+			deferredBgs.forEach(layer => {
+				const realSrc = layer.getAttribute('data-src');
+				layer.style.backgroundImage = `url('${realSrc}')`;
+				layer.style.backgroundSize = 'cover';
+				layer.style.backgroundPosition = 'center';
+			});
+
+			const deferredImgs = document.querySelectorAll('.deferred-img');
+			deferredImgs.forEach(img => {
+				img.src = img.getAttribute('data-src');
+			});
+		}, 400); 
 	});
 }
 
