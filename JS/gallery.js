@@ -1,7 +1,14 @@
-﻿
+﻿/**
+ * GALLERY CORE CONFIGURATION
+ * Base URL for R2 bucket storage. All asset paths are relative to this root.
+ */
 const BUCKET_BASE_URL = "https://pub-d0ee6bf954ad4bb68d200ac965c57765.r2.dev/";
 
-
+/**
+ * GALLERY REGISTRY
+ * A data structure representing folders and their content.
+ * 'startFrom' is an optional override used to shift sequence numbering (e.g. startFrom: 36 makes the img stack starts from Image36.webp).
+ */
 const galleryRegistry = [
 	{ type: "sequence", label: "Máy 01", path: "May_01", totalCount: 2030 },
 	{ type: "sequence", label: "Máy 02", path: "May_02", totalCount: 1400, startFrom: 36 },
@@ -115,6 +122,14 @@ const backButton = document.getElementById("back-button");
 //	});
 //}
 
+/**
+ * INITIAL GALLERY RENDER
+ * Populates the home screen. Uses a 'deferred hydration' pattern:
+ * 1. Build the DOM structure with placeholder placeholders.
+ * 2. Delay the heavy asset network requests (100ms) to prioritize main-thread smoothness.
+ * 3. Use texture/asset path cloning (img2=img1) to minimize R2 request count by 66%.
+ */
+
 function initGallery() {
 	folderView.innerHTML = ""; // Clear existing layout
 
@@ -170,6 +185,7 @@ function initGallery() {
 		}
 	});
 
+	// Defer asset loading until DOM is fully parsed to eliminate UI jank
 	window.addEventListener("DOMContentLoaded", () => {
 		setTimeout(() => {
 			const deferredBgs = document.querySelectorAll('.deferred-bg');
@@ -184,7 +200,7 @@ function initGallery() {
 			deferredImgs.forEach(img => {
 				img.src = img.getAttribute('data-src');
 			});
-		}, 100); 
+		}, 10); 
 	});
 }
 

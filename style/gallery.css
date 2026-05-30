@@ -1,81 +1,82 @@
-﻿/*main * {
-	outline: 1px solid red !important;
-}*/
+﻿/* --- GRID LAYOUT SYSTEM --- */
 
-/* Container for the whole grid of folders */
+/* Main container for the responsive folder/item grid */
 .folder-grid {
 	display: grid;
+	/* Auto-calculates columns based on available space; minimum 200px per item */
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	gap: 40px;
+	gap: 40px; /* Space between grid items */
 	padding: 40px;
-	justify-content: center;
+	justify-content: center; /* Centers the grid tracks within the parent container */
 	width: 100% !important;
 	box-sizing: border-box !important;
 	max-width: 100% !important;
 }
 
-/* Individual folder layout */
+/* Base style for individual card containers in the grid */
 .folder-card {
 	display: flex;
 	flex-direction: column;
-	align-items: center;
+	align-items: center; /* Centers stack and label horizontally */
 	cursor: pointer;
 }
 
-/* The stack boundary */
+/* Defines the fixed bounding area for the 3D-stacked effect */
 .image-stack {
-	margin: 10px;
+	margin: 10px; /* Provides external spacing, avoiding absolute positioning offset issues */
 	position: relative;
 	width: 150px;
 	height: 150px;
 }
 
-/* Shared properties for every card/photo in the stack */
+/* Base style for individual photographic layers within a stack */
 .photo {
-	position: absolute;
+	position: absolute; /* Allows layering over the container */
 	width: 100%;
 	height: 100%;
-	border-radius: 12px; /* Rounded rectangles */
-	background: #1a1a1a; /* Dark background color for the backing sheets */
-	border: 2px solid #333; /* Sharp subtle border */
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Soft shadow for depth */
-	box-sizing: border-box; /* Ensures padding doesn't break the width */
+	border-radius: 12px;
+	background: #1a1a1a;
+	border: 2px solid #333;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+	box-sizing: border-box; /* Includes border in element dimension calculations */
 	overflow: hidden;
-	transition: transform 0.3s ease;
+	transition: transform 0.3s ease; /* Enables smooth hover interactions */
 }
 
-/* --- THE TOP PHOTO CARD WITH INNER IMAGE --- */
+/* --- LAYER STYLING --- */
+
+/* The top-most layer (Layer 1) holds the primary preview image */
 .layer-1 {
 	transform: rotate(2deg);
 	z-index: 3;
-	background: #222; /* Base color of the photo frame */
+	background: #222;
 }
 
-	/* The actual preview image inside the top card */
+	/* Constraint for images inside the top layer to fill the available space */
 	.layer-1 img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
-		border-radius: 6px; /* Slightly less rounded to match the inner space */
+		border-radius: 6px;
 	}
 
-/* --- THE BACKING MESSY LAYERS --- */
-
-/* Back layer: tilted right */
+/* Background layer (Layer 3): Provides depth through tilt and offset */
 .layer-3 {
 	transform: rotate(7deg) translate(5px, 3px);
 	background: #121212;
 	opacity: 0.5;
 }
 
-/* Middle layer: tilted left */
+/* Middle layer (Layer 2): Provides depth through opposing tilt and offset */
 .layer-2 {
 	transform: rotate(-6deg) translate(-3px, 1px);
 	background: #161616;
 	opacity: 0.8;
 }
 
-/* --- THE HOVER SPREAD INTERACTION --- */
+/* --- HOVER INTERACTIONS --- */
+
+/* On hover, spread the layers outward to signify an open stack */
 .folder-card:hover .layer-3 {
 	transform: rotate(14deg) translate(12px, 6px);
 }
@@ -88,7 +89,9 @@
 	transform: rotate(0deg) scale(1.04);
 }
 
-/* --- THE TEXT LABEL --- */
+/* --- TEXT AND UI --- */
+
+/* Folder label styling */
 .folder-label {
 	margin-top: 20px;
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -97,11 +100,12 @@
 	text-align: center;
 }
 
+/* Utility class to visually and functionally hide elements */
 .hidden {
 	display: none !important;
 }
 
-/* Back Button Style matching your dark monospace theme */
+/* Navigation back button */
 .back-btn {
 	display: inline-block;
 	margin: 20px 0 0 40px;
@@ -122,14 +126,14 @@
 		color: #fff;
 	}
 
-/* Layout for a standalone single item card */
+/* Single item view styling */
 .item-card {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 }
 
-	/* Force the single layer inside items view to be perfectly straight and interactive */
+	/* Removes rotation and stack effects for single image items */
 	.item-card .layer-1 {
 		transform: rotate(0deg);
 	}
@@ -138,17 +142,14 @@
 		transform: scale(1.04);
 	}
 
-
+/* --- RESPONSIVE OVERRIDES (Mobile devices) --- */
 @media (max-width: 768px) {
-	/* Tighten padding and force exactly 2 columns across */
 	.folder-grid {
-		grid-template-columns: repeat(2, 1fr);
-		gap: 24px; /* Narrower gap to save screen estate */
+		grid-template-columns: repeat(2, 1fr); /* Forces 2-column layout */
+		gap: 24px;
 		padding: 20px 1rem;
-		justify-content: center;
 	}
 
-	/* Shrink the stack boxes so two of them fit side-by-side */
 	.image-stack {
 		width: 110px;
 		height: 110px;
@@ -158,37 +159,38 @@
 		margin-top: 14px;
 		font-size: 13px;
 	}
+
 	.back-btn {
 		margin: 20px 0 0 20px;
 	}
 
+	/* Disables hover transforms for touch-based devices */
 	.item-card:hover .layer-1,
 	.folder-card:hover .layer-1 {
 		transform: none !important;
 	}
 
-	/* Re-expand the stack box real estate so fingers have a wider landing pad */
 	.item-card .image-stack {
-		width: 130px; 
+		width: 130px;
 		height: 130px;
 	}
-
-	
 }
 
-/* For Gecko Browsers (Desktop Firefox, Firefox Mobile) */
+/* --- LIGHTBOX MODAL & MEDIA OVERLAYS --- */
+
+/* Forces browser media controls to remain visible */
 video::-moz-media-controls {
 	opacity: 1 !important;
 	visibility: visible !important;
 	display: flex !important;
 }
 
-/* Stop the video overlay background fade/dim effect from turning off */
+/* Ensures video overlay gradient remains active */
 video::-webkit-media-controls-enclosure {
 	background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0) 100%) !important;
 }
 
-
+/* Modal dialog container for viewing media in original scale */
 dialog.lightbox {
 	border: none;
 	background: transparent;
@@ -203,18 +205,17 @@ dialog.lightbox {
 	overflow: hidden;
 }
 
-	/* Open state display controller */
 	dialog.lightbox[open] {
 		display: flex;
 	}
 
-	/* The native backdrop layer (Frosted dark background) */
+	/* Backdrop background effect */
 	dialog.lightbox::backdrop {
 		background: rgba(0, 0, 0, 0.5);
 		backdrop-filter: blur(8px);
 	}
 
-/* Main Container spacing */
+/* Container for the media inside the lightbox */
 .lightbox-content {
 	position: relative;
 	max-width: 90vw;
@@ -224,7 +225,6 @@ dialog.lightbox {
 	justify-content: center;
 }
 
-	/* Image & Video responsiveness constraints */
 	.lightbox-content img,
 	.lightbox-content video {
 		max-width: 100%;
@@ -234,7 +234,7 @@ dialog.lightbox {
 		box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
 	}
 
-/* Sticky Exit 'X' Button styling matching your dark theme */
+/* Exit button for the modal view */
 .lightbox-close {
 	position: absolute;
 	top: 24px;
@@ -263,7 +263,7 @@ dialog.lightbox {
 		transform: scale(1.05);
 	}
 
-/* Lock scroll frame background when asset view is open */
+/* Prevents background scroll while modal is active */
 body:has(dialog[open]) {
 	overflow: hidden;
 }
