@@ -151,8 +151,8 @@ function initGallery() {
 			const file3 = `Image${String(startIdx + 2).padStart(2, '0')}.webp`; // e.g., Image38.webp
 
 			img1 = `${BUCKET_BASE_URL}${folder.path}/${file1}`;
-			img2 = `${BUCKET_BASE_URL}${folder.path}/${file2}`;
-			img3 = `${BUCKET_BASE_URL}${folder.path}/${file3}`;
+			img2 = img1;
+			img3 = img1;
 
 			const folderHTML = `
                 <div class="folder-card" onclick="openFolder(${index})">
@@ -184,7 +184,7 @@ function initGallery() {
 			deferredImgs.forEach(img => {
 				img.src = img.getAttribute('data-src');
 			});
-		}, 400); 
+		}, 100); 
 	});
 }
 
