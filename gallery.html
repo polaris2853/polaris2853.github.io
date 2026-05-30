@@ -9,9 +9,9 @@
 	<title>27yx's Memories</title>
 	<link rel="stylesheet" href="style/style.css">
 	<link rel="stylesheet" href="style/style_nav.css">
+	<link rel="stylesheet" href="style/gallery.css">
 	<link rel="stylesheet" href="style/color.css">
 	<link rel="stylesheet" href="style/effects.css">
-	<link rel="stylesheet" href="style/lb.css">
 	<!--<link rel="stylesheet" href="style/style_timeline.css">-->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,6 +26,7 @@
 		<nav class="navbar" id="navbar">
 			<button class="toggle-btn" type="button">☰</button>
 			<div id="nav-overlay"></div>
+			<div id="nav-overlay"></div>
 			<ul class="nav-links" id="navLinks">
 				<li><a href="index.html">Home</a></li>
 				<li><a href="timeline.html">Timeline</a></li>
@@ -35,24 +36,55 @@
 			</ul>
 			<button id="login-btn">Login</button>
 		</nav>
+		<div id="h-container">
+			<h1>A Literal <span style="color: #66edff;">Gallery</span></h1>
+			<!--<small style="align-items:center"><span style="color: #fff;">12A6 · SNAPSHOT</span></small>-->
+		</div>
 
-		<h1>🏆 Xếp hạng độ nổi tiếng của ảnh cá nhân</h1>
 	</header>
 
 	<main>
-		<h2></h2>
-		<br />
-		<br />
-		<div>
-			<table class="leaderboard-terminal" id="leaderboard">
-				<!--<thead>
-					<tr><th></th><th></th><th></th></tr>
-				</thead>-->
-				<tbody></tbody>
-			</table>
 
-		</div>
+		<button id="back-button" class="back-btn hidden" onclick="showFolderView()">← Back to Folders</button>
+
+		<div id="folder-view" class="folder-grid"></div>
+
+		<div id="item-view" class="folder-grid hidden"></div>
+
 	</main>
+
+	<canvas id="canvas" style=" position: fixed; top: 0; left: 0; z-index:-1;"></canvas>
+	<script>
+		const canvas = document.getElementById('canvas');
+		const ctx = canvas.getContext('2d');
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		let particles = [];
+		for (let i = 0; i < 100; i++) {
+			particles.push({
+				x: Math.random() * canvas.width,
+				y: Math.random() * canvas.height,
+				radius: Math.random() * 7,
+				speed: Math.random() * 0.5 + 0.1
+			});
+		}
+
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+			particles.forEach(p => {
+				ctx.beginPath();
+				ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+				ctx.fill();
+				p.y -= p.speed;
+				if (p.y < 0) p.y = canvas.height;
+			});
+			requestAnimationFrame(draw);
+		}
+		draw();
+	</script>
+	<script src="JS/gallery.js"></script>
 
 	<footer>
 		<p>&copy; 12A6-K63 2026 </p>
@@ -67,11 +99,7 @@
 			</div>
 		<p><a href="#top" class="back-to-top">※</a></p>
 
-
 	</footer>
-
-	<script type="module" src="JS/loadlb.js"></script>
-
 </body>
 
 </html>

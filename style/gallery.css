@@ -1,0 +1,223 @@
+﻿/* Container for the whole grid of folders */
+.folder-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 40px;
+	padding: 40px;
+}
+
+/* Individual folder layout */
+.folder-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
+}
+
+/* The stack boundary */
+.image-stack {
+	padding: 10px;
+	position: relative;
+	width: 150px;
+	height: 150px;
+}
+
+/* Shared properties for every card/photo in the stack */
+.photo {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	border-radius: 12px; /* Rounded rectangles */
+	background: #1a1a1a; /* Dark background color for the backing sheets */
+	border: 2px solid #333; /* Sharp subtle border */
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Soft shadow for depth */
+	box-sizing: border-box; /* Ensures padding doesn't break the width */
+	overflow: hidden;
+	transition: transform 0.3s ease;
+}
+
+/* --- THE TOP PHOTO CARD WITH INNER IMAGE --- */
+.layer-1 {
+	transform: rotate(2deg);
+	z-index: 3;
+	background: #222; /* Base color of the photo frame */
+	padding: 8px; /* This shrinks the image away from the edges */
+}
+
+	/* The actual preview image inside the top card */
+	.layer-1 img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 6px; /* Slightly less rounded to match the inner space */
+	}
+
+/* --- THE BACKING MESSY LAYERS --- */
+
+/* Back layer: tilted right */
+.layer-3 {
+	transform: rotate(7deg) translate(5px, 3px);
+	background: #121212;
+	opacity: 0.5;
+}
+
+/* Middle layer: tilted left */
+.layer-2 {
+	transform: rotate(-6deg) translate(-3px, 1px);
+	background: #161616;
+	opacity: 0.8;
+}
+
+/* --- THE HOVER SPREAD INTERACTION --- */
+.folder-card:hover .layer-3 {
+	transform: rotate(14deg) translate(12px, 6px);
+}
+
+.folder-card:hover .layer-2 {
+	transform: rotate(-12deg) translate(-12px, 3px);
+}
+
+.folder-card:hover .layer-1 {
+	transform: rotate(0deg) scale(1.04);
+}
+
+/* --- THE TEXT LABEL --- */
+.folder-label {
+	margin-top: 20px;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 14px;
+	color: #e0e0e0;
+	text-align: center;
+}
+
+.hidden {
+	display: none !important;
+}
+
+/* Back Button Style matching your dark monospace theme */
+.back-btn {
+	display: inline-block;
+	margin: 20px 0 0 40px;
+	padding: 8px 16px;
+	background: #1a1a1a;
+	border: 2px solid #333;
+	border-radius: 8px;
+	color: #e0e0e0;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 14px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+	.back-btn:hover {
+		background: #222;
+		border-color: #555;
+		color: #fff;
+	}
+
+/* Layout for a standalone single item card */
+.item-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+	/* Force the single layer inside items view to be perfectly straight and interactive */
+	.item-card .layer-1 {
+		transform: rotate(0deg);
+	}
+
+	.item-card:hover .layer-1 {
+		transform: scale(1.04);
+	}
+
+
+@media (max-width: 768px) {
+	/* Tighten padding and force exactly 2 columns across */
+	.folder-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 24px; /* Narrower gap to save screen estate */
+		padding: 20px;
+	}
+
+	/* Shrink the stack boxes so two of them fit side-by-side */
+	.image-stack {
+		width: 110px;
+		height: 110px;
+	}
+
+	.folder-label {
+		margin-top: 14px;
+		font-size: 13px;
+	}
+	.back-btn {
+		margin: 20px 0 0 20px;
+	}
+
+	.item-card:hover .layer-1,
+	.folder-card:hover .layer-1 {
+		transform: none !important;
+	}
+
+	/* Re-expand the stack box real estate so fingers have a wider landing pad */
+	.item-card .image-stack {
+		width: 140px; 
+		height: 140px;
+	}
+
+	/* Force the video element to break out of layer depth restrictions */
+	.item-card video {
+		position: relative;
+		z-index: 10; /* Elevates player controls directly to the top layer */
+		pointer-events: auto !important; /* Forces the mobile browser to prioritize this tap destination */
+	}
+
+	/* 4. Force WebKit/iOS engine to reveal hidden media player controls */
+	video::-webkit-media-controls {
+		display: flex !important;
+	}
+
+	video::-webkit-media-controls-fullscreen-button {
+		display: inline-block !important; /* Restores the missing expand button */
+	}
+
+	video::-webkit-media-controls-panel {
+		display: flex !important;
+		opacity: 1 !important;
+		visibility: visible !important;
+		transition: none !important; /* Kills the browser's native fade-out animation */
+	}
+
+	/* Hard-locks the container enclosing the play, volume, and fullscreen buttons */
+	video::-webkit-media-controls-enclosure {
+		display: flex !important;
+		opacity: 1 !important;
+		visibility: visible !important;
+	}
+
+	/* Ensure controls don't hide on standard modern standard layouts */
+	video::media-controls-panel {
+		display: flex !important;
+		opacity: 1 !important;
+		visibility: visible !important;
+	}
+}
+
+video::-webkit-media-controls-panel {
+	display: flex !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	transition: none !important; /* Fully stops the fading animation engine */
+}
+
+/* For Gecko Browsers (Desktop Firefox, Firefox Mobile) */
+video::-moz-media-controls {
+	opacity: 1 !important;
+	visibility: visible !important;
+	display: flex !important;
+}
+
+/* Stop the video overlay background fade/dim effect from turning off */
+video::-webkit-media-controls-enclosure {
+	background-image: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 40%, rgba(0, 0, 0, 0) 100%) !important;
+}
