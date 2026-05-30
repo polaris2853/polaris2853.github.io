@@ -4,7 +4,7 @@ const BUCKET_BASE_URL = "https://pub-d0ee6bf954ad4bb68d200ac965c57765.r2.dev/";
 
 const galleryRegistry = [
 	{ type: "sequence", label: "Máy 01", path: "May_01", totalCount: 2030 },
-	{ type: "sequence", label: "Máy 02", path: "May_02", totalCount: 1400 },
+	{ type: "sequence", label: "Máy 02", path: "May_02", totalCount: 1400, startFrom: 36 },
 	{ type: "sequence", label: "Máy 03", path: "May_03", totalCount: 998 },
 	{ type: "sequence", label: "Máy 04", path: "May_04", totalCount: 1200 },
 
@@ -123,7 +123,7 @@ function initGallery() {
 
 		if (folder.type === "video") {
 			// Local fallback covers (no network overhead)
-			img1 = "asserts/img/01. Lê Công Hải Anh.webp";
+			img1 = "asserts/timeline/ảnh1.jpeg";
 			img2 = "asserts/img/01. Lê Công Hải Anh.webp";
 			img3 = "asserts/img/01. Lê Công Hải Anh.webp";
 
@@ -143,9 +143,16 @@ function initGallery() {
 			folderView.insertAdjacentHTML("beforeend", folderHTML);
 		} else {
 
-			img1 = `${BUCKET_BASE_URL}${folder.path}/Image01.webp`;
-			img2 = `${BUCKET_BASE_URL}${folder.path}/Image02.webp`;
-			img3 = `${BUCKET_BASE_URL}${folder.path}/Image03.webp`;
+			const startIdx = folder.startFrom ? folder.startFrom : 1;
+
+			// Generate the sequential filenames dynamically
+			const file1 = `Image${String(startIdx).padStart(2, '0')}.webp`;     // e.g., Image36.webp
+			const file2 = `Image${String(startIdx + 1).padStart(2, '0')}.webp`; // e.g., Image37.webp
+			const file3 = `Image${String(startIdx + 2).padStart(2, '0')}.webp`; // e.g., Image38.webp
+
+			img1 = `${BUCKET_BASE_URL}${folder.path}/${file1}`;
+			img2 = `${BUCKET_BASE_URL}${folder.path}/${file2}`;
+			img3 = `${BUCKET_BASE_URL}${folder.path}/${file3}`;
 
 			const folderHTML = `
                 <div class="folder-card" onclick="openFolder(${index})">
