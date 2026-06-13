@@ -20,7 +20,7 @@ const galleryRegistry = [
 	{ type: "sequence", label: "Sequence - Old", path: "Sequence/old", totalCount: 96 },
 
 	{ type: "sequence", label: "Zalo", path: "Zalo", totalCount: 778 },
-	{ type: "sequence", label: "Random", path: "Random", totalCount: 91 },
+	{ type: "sequence", label: "Random", path: "Random", totalCount: 90 },
 
 
 	{
@@ -211,7 +211,7 @@ function initGallery() {
 // Global state trackers for pagination
 let currentFolderData = null;
 let currentRenderedIndex = 0;
-const ITEMS_PER_PAGE = 60; // Perfect chunk size to fill the screen without lag
+const ITEMS_PER_PAGE = 6; // Perfect chunk size to fill the screen without lag
 
 function openFolder(index) {
 	const folder = galleryRegistry[index];

@@ -131,6 +131,9 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	content-visibility: auto;
+	contain-intrinsic-size: 300px; /* Tells the browser the estimated height of a card before loading */
+
 }
 
 	/* Removes rotation and stack effects for single image items */
